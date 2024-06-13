@@ -1,27 +1,32 @@
 from DAlgebra import D_Value
+
+
 class Gate:
-    def __init__(self, name, type, inputs):
-        self.name = name
+    def __init__(self, id, type, inputs, output):
+        self.id = id
         self.type = type
         self.inputs = inputs
-        self.output = None
-        
+        self.output = output
+
         # Distance Parameters
         self.PI_distance = 0
         self.PO_distance = 0
-        
+
         # SCOAP Parameters
-        self.CC0 = 0    # Combinational 0-controllability of line l. 
-                        # The number of lines from the primary inputs that have to be traced to put a 0 on line l.
-                        
-        self.CC1 = 0    # Combinational 1-controllability of line l.
-                        # The number of lines from the primary inputs that have to be traced to put a 1 on line l.
-                        
-        self.CCb = 0    # Combinational observability of line l.
-                        # The number of lines that have to be traced to observe value of line l on a primary output. 
+        self.CC0 = 0  # Combinational 0-controllability of line l.
+        # The number of lines from the primary inputs that have to be traced to put a 0 on line l.
+
+        self.CC1 = 0  # Combinational 1-controllability of line l.
+        # The number of lines from the primary inputs that have to be traced to put a 1 on line l.
+
+        self.CCb = 0  # Combinational observability of line l.
+        # The number of lines that have to be traced to observe value of line l on a primary output.
+
+        return
 
     def get_previous_gates(self):
-        pass
+        return
+
     def evaluate(self):
         """
         Evaluates the output of the gate based on its type.
@@ -49,6 +54,8 @@ class Gate:
         elif self.type == "XNOR":
             self.output = self.evaluate_xnor()
 
+        return
+
     def evaluate_and(self):
         """
         Evaluates the output of an AND gate based on its inputs.
@@ -67,25 +74,25 @@ class Gate:
         # Check if any input is ZERO
         if D_Value.ZERO in self.inputs:
             return D_Value.ZERO
-        
+
         # Check if any input is X
         if D_Value.X in self.inputs:
             return D_Value.X
-        
+
         # Check if both D and D_PRIME are in the inputs
         if D_Value.D in self.inputs and D_Value.D_PRIME in self.inputs:
             return D_Value.ZERO
-        
+
         # Check if D is in the inputs and if all inputs are either ONE or D
         if D_Value.D in self.inputs:
             if all(val in [D_Value.ONE, D_Value.D] for val in self.inputs):
                 return D_Value.D
-        
+
         # Check if D_PRIME is in the inputs and if all inputs are either ONE or D_PRIME
         if D_Value.D_PRIME in self.inputs:
             if all(val in [D_Value.ONE, D_Value.D_PRIME] for val in self.inputs):
                 return D_Value.D_PRIME
-        
+
         # Return ONE if none of the above conditions are met
         return D_Value.ONE
 
@@ -144,18 +151,18 @@ class Gate:
         # Count the occurrences of D and D_PRIME
         d_count = self.inputs.count(D_Value.D)
         d_prime_count = self.inputs.count(D_Value.D_PRIME)
-        
+
         # Count the occurrences of ONE and ZERO
         one_count = self.inputs.count(D_Value.ONE)
         zero_count = self.inputs.count(D_Value.ZERO)
-        
+
         # Count the occurrences of X
         x_count = self.inputs.count(D_Value.X)
-        
+
         # If any input is X, the output is X
         if x_count > 0:
             return D_Value.X
-        
+
         # If the count of D and D_PRIME are not equal, the output is determined based on the count of ONE and ZERO
         if d_count % 2 != d_prime_count % 2:
             if one_count % 2 == 0:
@@ -201,6 +208,7 @@ class Gate:
             return D_Value.ONE
         else:
             return D_Value.X
+
     def evaluate_nand(self):
         """
         Evaluates the output of a NAND gate based on its inputs.
@@ -231,13 +239,14 @@ class Gate:
         """
         # Create an OR gate
         or_gate = Gate("OR", "OR", self.inputs, None)  # Create an OR gate
-        or_gate.evaluate()                              # Evaluate the OR gate
+        or_gate.evaluate()  # Evaluate the OR gate
 
         # Create a NOT gate for the OR gate's output
         not_gate = Gate("NOT", "NOT", [or_gate.output], None)  # Create a NOT gate
-        not_gate.evaluate()                                      # Evaluate the NOT gate
+        not_gate.evaluate()  # Evaluate the NOT gate
 
         return not_gate.output  # Return the output of the NOT gate
+
     def evaluate_xnor(self):
         """
         Evaluates the output of an XNOR gate based on its inputs.
@@ -249,11 +258,10 @@ class Gate:
         """
         # Create an XOR gate
         xor_gate = Gate("XOR", "XOR", self.inputs, None)  # Create an XOR gate
-        xor_gate.evaluate()                              # Evaluate the XOR gate
+        xor_gate.evaluate()  # Evaluate the XOR gate
 
         # Create a NOT gate for the XOR gate's output
         not_gate = Gate("NOT", "NOT", [xor_gate.output], None)  # Create a NOT gate
-        not_gate.evaluate()                                      # Evaluate the NOT gate
+        not_gate.evaluate()  # Evaluate the NOT gate
 
         return not_gate.output  # Return the output of the NOT gate
-
