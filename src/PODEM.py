@@ -6,7 +6,7 @@ class PODEM:
     The PODEM class .
 
     """
-    def __init__(self, gates, lines, Primary_Inputs, Primary_Outputs):
+    def __init__(self):
         self.objective = None
         self.gates = []             # List of all gates in the circuit
         self.lines =[]              # List of all lines in the circuit
@@ -16,7 +16,12 @@ class PODEM:
         pass
     def parse_file(self, filename):
         pass
-    def compute(self):
+    def compute(self, algorithm = "basic"):
+        # algorithm = "basic" or "advanced"
+        if algorithm == "basic":
+            self.basic_PODEM()
+        elif algorithm == "advanced":
+            self.advanced_PODEM()
         pass
     def justify(self):
         pass
@@ -121,5 +126,7 @@ class PODEM:
                     
         return False    
             
+    def advanced_PODEM(self):
+        pass
             
      
