@@ -138,8 +138,12 @@ class PODEM:
             if output == D_Value.D or output == D_Value.D_PRIME:
                 return True
 
-    def ret_success(self):
-        return
+    def ret_success_vector(self):
+        test_vector = []
+        for PI in self.circuit.primary_input_gates:
+            test_vector.append(PI.value)
+            
+        return test_vector
 
     def check_D_in_circuit(self):
         """
@@ -151,7 +155,7 @@ class PODEM:
             bool: True if a gate with D or D' value is found, False otherwise.
         """
         # Iterate through all the gates in the circuit
-        for gate in self.circuit.gates:
+        for gate in self.circuit.gates.values():
             # Check if the gate has a value of D or D'
             if gate.value == D_Value.D or gate.value == D_Value.D_PRIME:
                 # If a gate with D or D' value is found, return True
@@ -173,7 +177,7 @@ class PODEM:
                 # If error at a PO
                 # SUCCESS; Exit;
                 if self.check_error_at_primary_outputs():
-                    return self.ret_success()
+                    return True , self.ret_success_vector()
                 else:
                     if (
                         not self.check_D_in_circuit()
@@ -181,7 +185,7 @@ class PODEM:
                     ):
                         continue
 
-        return False
+        return False, []
 
     def advanced_PODEM(self):
         return
