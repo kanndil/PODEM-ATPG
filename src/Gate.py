@@ -9,10 +9,10 @@ class Gate:
         self.output_gates = []
         self.outputpin = outputpin
         self.value = D_Value.X
-        
+
         if type == "input_pin" or type == "output_pin":
             self.is_pin = True
-        else: 
+        else:
             self.is_pin = False
 
         # Distance Parameters

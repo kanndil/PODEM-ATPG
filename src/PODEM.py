@@ -1,11 +1,13 @@
 from Gate import Gate
 from DAlgebra import D_Value
 
+
 class PODEM:
     """
     The PODEM class .
 
     """
+
     def __init__(self, circuit):
         """
         Initializes a PODEM object.
