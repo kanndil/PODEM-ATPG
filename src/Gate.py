@@ -2,11 +2,18 @@ from DAlgebra import D_Value
 
 
 class Gate:
-    def __init__(self, id, type, inputs, output):
+    def __init__(self, id, type, inputs, outputpin):
         self.id = id
         self.type = type
-        self.inputs = inputs
-        self.output = output
+        self.input_gates = inputs
+        self.output_gates = []
+        self.outputpin = outputpin
+        self.value = D_Value.X
+        
+        if type == "input_pin" or type == "output_pin":
+            self.is_pin = True
+        else: 
+            self.is_pin = False
 
         # Distance Parameters
         self.PI_distance = 0

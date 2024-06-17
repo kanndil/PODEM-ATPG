@@ -3,7 +3,8 @@ import re
 
 
 class Circuit:
-    ID_index = 0  # index of the gates' IDs in the circuit
+
+    index_id = 0
 
     def __init__(self):
         """
@@ -16,8 +17,9 @@ class Circuit:
         Returns:
             None
         """
-        # List of all gates in the circuit
-        self.gates = []
+        # Dictionary of all gates in the circuit mapped to the ID of their output pins
+        # This mapping is very useful for when searching for neighbouring gates
+        self.gates = {}
 
         # List of all primary input gates
         self.primary_input_gates = []
@@ -66,12 +68,13 @@ class Circuit:
                 # Check if the line matches an input gate pattern
                 elif input_match := input_pattern.match(line):
                     # Add the input gate id to the list of primary input gates
-                    self.primary_input_gates.append(int(input_match.group(1)))
+                    self.add_gate( "input_pin", [],int(output_match.group(1)))
 
                 # Check if the line matches an output gate pattern
                 elif output_match := output_pattern.match(line):
                     # Add the output gate id to the list of primary output gates
-                    self.Primary_Output_gates.append(int(output_match.group(1)))
+                    self.add_gate("output_pin", [int(output_match.group(1)),], int(output_match.group(1)))
+                    
 
                 # Check if the line matches a gate pattern
                 elif gate_match := gate_pattern.match(line):
@@ -80,14 +83,14 @@ class Circuit:
                     gate_type = gate_match.group(2)
                     gate_inputs = list(map(int, gate_match.group(3).split(",")))
                     # Add the gate to the circuit
-                    self.add_gate(gate_type, gate_inputs, gate_output)
+                    self.add_gate( gate_type, gate_inputs,gate_output)
 
+
+        self.build_graph(self)
         # Map each primary input to the corresponding gates
-        self.map_gates_to_PI()
-        # TODO: if needed, create a dictionary that maps outputs to gates
         return
 
-    def add_gate(self, type, inputs, output):
+    def add_gate(self, type, inputs, output_pin_id):
         """
         Add a gate to the circuit.
 
@@ -99,18 +102,23 @@ class Circuit:
         Returns:
             None
         """
+
         # Create a new gate with the given parameters
-        gate = Gate(self.ID_index, type, inputs, output)
+        gate = Gate(self.index_id, type, inputs, output_pin_id)
         
-        # Add the gate to the list of gates in the circuit
-        self.gates.append(gate)
-        
-        # Increment the ID index for the next gate
-        self.ID_index += 1
-        
+        if type == "input_pin":
+            self.primary_input_gates.append(gate)
+        elif type == "output_pin":
+            self.Primary_Output_gates.append(gate)
+            
+        if type != "output_pin":  
+            # Add the gate to the dictionary of gates based on the output id
+            self.gates[output_pin_id] = gate
+
+        self.index_id += 1
         return
 
-    def map_gates_to_PI(self):
+    def map_gates_to_PI(self): # todo: remove this (build graph fulfills the purpose)
         """
         Maps each primary input to the corresponding gates.
 
@@ -131,3 +139,38 @@ class Circuit:
                 if input in self.get_gates_from_PI:
                     self.get_gates_from_PI[input].append(gate.id)
         return
+
+    def build_graph(self):
+        """
+        Builds the graph representation of the circuit, connecting the gates based on their input and output pins.
+
+        This function iterates over all the gates in the circuit and connects them based on their input pins.
+        For each gate, it retrieves its input pins and clears the list of input gates.
+        Then, for each input pin, it retrieves the corresponding gate from the circuit's dictionary of gates,
+        and connects the current gate to it as an input gate.
+        It also connects the previous gate to the current gate as an output gate.
+
+        Returns:
+            None
+        """
+        # Iterate over each gate in the circuit
+        for current_gate in self.gates.values():
+            # Get the input pins of the gate
+            input_ids = current_gate.inputs
+            # Clear the list of input gates
+            current_gate.inputs.clear()
+            # Iterate over each input pin
+            for input_id in input_ids:
+                # Retrieve the corresponding previoud gate from the circuit's dictionary of gates
+                previous_gate = self.gates[input_id]
+                # Connect the current gate to the previous gate as an input gate
+                current_gate.inputs.append(previous_gate)
+                # Connect the previous gate to the current gate as an output gate
+                previous_gate.outputs.append(current_gate)
+                
+    def print_graph(self):
+        for gate in self.gates.values():
+            print(gate.type, gate.id)
+            print(gate.inputs)
+            print(gate.outputs)
+            print()

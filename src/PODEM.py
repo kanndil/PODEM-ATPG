@@ -1,27 +1,51 @@
 from Gate import Gate
 from DAlgebra import D_Value
 
-
 class PODEM:
     """
     The PODEM class .
 
     """
-
-    ID_INDEX = 0
-
     def __init__(self, circuit):
+        """
+        Initializes a PODEM object.
+
+        Args:
+            circuit (Circuit): The circuit object representing the design.
+
+        Returns:
+            None
+        """
+        # Assign the circuit object to the PODEM object
         self.circuit = circuit
+
+        # Initialize the objective function
         self.objective = None
-        self.D_Frontier = []  # List of all gates with D/D' input and X output
-        return
+
+        # Initialize the list of gates with D/D' input and X output
+        self.D_Frontier = []
 
     def compute(self, algorithm="basic"):
+        """
+        Computes the PODEM using the specified algorithm.
+
+        Args:
+            algorithm (str): The algorithm to use. Possible values are "basic" and "advanced".
+                             Defaults to "basic".
+
+        Returns:
+            None
+
+        """
         # algorithm = "basic" or "advanced"
+        # Use the specified algorithm to compute the PODEM
         if algorithm == "basic":
+            # Use the basic POem algorithm
             self.basic_PODEM()
         elif algorithm == "advanced":
+            # Use the advanced Poem algorithm
             self.advanced_PODEM()
+        # Return nothing
         return
 
     def justify(self):
@@ -33,10 +57,9 @@ class PODEM:
 
         This function iterates through all the gates in the circuit and sets their output to X.
         """
-        for gate in self.gates:
+        for gate in self.circuit.gates:
             # Set the output of each gate to X
-            gate.output = D_Value.X
-
+            gate.value = D_Value.X
         return
 
     def get_gate_from_input(self, input):
