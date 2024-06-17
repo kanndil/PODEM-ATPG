@@ -1,5 +1,6 @@
 import argparse
 from PODEM import PODEM
+from Ciruit import Circuit
 
 
 def main():
@@ -14,12 +15,14 @@ def main():
     # Parse arguments
     args = parser.parse_args()
 
+    circuit = Circuit()
+    circuit.parse_file(filename=args.input_file)
+
     # Create PODEM agent and parse the input file
-    podem_agent = PODEM()
-    podem_agent.parse_file(args.input_file)
+    podem_agent = PODEM(circuit=circuit)
 
     # Compute the PODEM
-    podem_agent.compute("basic")
+    podem_agent.compute(algorithm="basic")
 
 
 if __name__ == "__main__":
