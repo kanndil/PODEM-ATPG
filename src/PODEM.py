@@ -43,12 +43,12 @@ class PODEM:
         # Use the specified algorithm to compute the PODEM
         if algorithm == "basic":
             # Use the basic POem algorithm
-            self.basic_PODEM()
+            return self.basic_PODEM()
         elif algorithm == "advanced":
             # Use the advanced Poem algorithm
-            self.advanced_PODEM()
+            return self.advanced_PODEM()
         # Return nothing
-        return
+        return 
 
     def justify(self):
         return
@@ -134,7 +134,7 @@ class PODEM:
         return
 
     def check_error_at_primary_outputs(self):
-        for output in self.Primary_Outputs:
+        for output in self.circuit.primary_output_gates:
             if output == D_Value.D or output == D_Value.D_PRIME:
                 return True
 
@@ -203,7 +203,7 @@ class PODEM:
 
     def basic_PODEM(self):
         # While PI Branch-and-bound value possible
-        for primary_input in self.Primary_Inputs:
+        for primary_input in self.circuit.primary_input_gates:
             # Get a new PI value
             for value in [0, 1]:
                 # Imply new PI value

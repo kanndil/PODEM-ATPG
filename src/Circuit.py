@@ -25,10 +25,8 @@ class Circuit:
         self.primary_input_gates = []
 
         # List of all primary output gates
-        self.Primary_Output_gates = []
+        self.primary_output_gates = []
 
-        # Dictionary of circuit information
-        self.circuit_info = {}
 
         # Dictionary that maps each primary input to the corresponding gates
         self.get_gates_from_PI = {}
@@ -60,15 +58,12 @@ class Circuit:
 
                 # Check if the line starts with a comment
                 if line.startswith("#"):
-                    # Extract the key-value pair from the comment
-                    key, value = line[2:].split()
-                    # Add the key-value pair to the circuit information dictionary
-                    self.circuit_info[key] = value
+                    continue
 
                 # Check if the line matches an input gate pattern
                 elif input_match := input_pattern.match(line):
                     # Add the input gate id to the list of primary input gates
-                    self.add_gate("input_pin", [], int(output_match.group(1)))
+                    self.add_gate("input_pin", [], int(input_match.group(1)))
 
                 # Check if the line matches an output gate pattern
                 elif output_match := output_pattern.match(line):
@@ -90,7 +85,7 @@ class Circuit:
                     # Add the gate to the circuit
                     self.add_gate(gate_type, gate_inputs, gate_output)
 
-        self.build_graph(self)
+        self.build_graph()
         # Map each primary input to the corresponding gates
         return
 
@@ -113,7 +108,7 @@ class Circuit:
         if type == "input_pin":
             self.primary_input_gates.append(gate)
         elif type == "output_pin":
-            self.Primary_Output_gates.append(gate)
+            self.primary_output_gates.append(gate)
 
         if type != "output_pin":
             # Add the gate to the dictionary of gates based on the output id
@@ -160,9 +155,9 @@ class Circuit:
         # Iterate over each gate in the circuit
         for current_gate in self.gates.values():
             # Get the input pins of the gate
-            input_ids = current_gate.inputs
+            input_ids = current_gate.input_gates
             # Clear the list of input gates
-            current_gate.inputs.clear()
+            current_gate.input_gates.clear()
             # Iterate over each input pin
             for input_id in input_ids:
                 # Retrieve the corresponding previoud gate from the circuit's dictionary of gates
