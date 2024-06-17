@@ -171,13 +171,37 @@ class PODEM:
         for gate in self.circuit.gates.values():
             # Check if the gate has a value of D or D'
             if gate.value == D_Value.D or gate.value == D_Value.D_PRIME:
-                # If a gate with D or D' value is found, return True
-                return True
+                # If a gate with D or D' value is found, check for an X path
+                for output_gate in gate.output_gates:
+                    if self.check_X_path(output_gate):
+                        return True
+
         # If no gate with D or D' value is found, return False
         return False
 
-    def check_X_path_in_circuit(self):
-        return
+    def check_X_path(self, gate):
+        """
+        Check if there is an X path from the given gate to an output pin.
+
+        Args:
+            gate (Gate): The gate to start the search from.
+
+        Returns:
+            bool: True if there is an X path, False otherwise.
+        """
+        # Base case: If the gate is an output pin, return True
+        if gate.type == "output_pin":
+            return True
+
+        # Recursive case: If the gate has an X value and there is an X path from one of its output gates, return True
+        if gate.value == D_Value.X:
+            for output_gate in gate.output_gates:
+                if self.check_X_path(output_gate):
+                    return True
+
+        # If no X path is found, return False
+        return False
+
 
     def basic_PODEM(self):
         # While PI Branch-and-bound value possible
