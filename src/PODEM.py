@@ -89,8 +89,8 @@ class PODEM:
             initial_output_value = next_gate.output
 
             ## Simulate the gate # todo: check if needed
-            #self.simulate_gate(next_gate)
-            
+            # self.simulate_gate(next_gate)
+
             # Evaluate the gate
             next_gate.evaluate()
 
@@ -157,7 +157,6 @@ class PODEM:
         # Return the test vector
         return test_vector
 
-
     def check_D_in_circuit(self):
         """
         Check if the circuit contains a gate with D or D' value.
@@ -202,7 +201,6 @@ class PODEM:
         # If no X path is found, return False
         return False
 
-
     def basic_PODEM(self):
         # While PI Branch-and-bound value possible
         for primary_input in self.Primary_Inputs:
@@ -214,7 +212,7 @@ class PODEM:
                 # If error at a PO
                 # SUCCESS; Exit;
                 if self.check_error_at_primary_outputs():
-                    return True , self.ret_success_vector()
+                    return True, self.ret_success_vector()
                 else:
                     if (
                         not self.check_D_in_circuit()
