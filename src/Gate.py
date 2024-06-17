@@ -14,7 +14,12 @@ class Gate:
             self.is_pin = True
         else:
             self.is_pin = False
-
+        
+        if type == "NOT" or type == "NAND" or type == "NOR" or type == "XNOR":
+            self.inversion_parity=1
+        else: 
+            self.inversion_parity=0
+            
         # Distance Parameters
         self.PI_distance = 0
         self.PO_distance = 0
