@@ -64,7 +64,7 @@ class PODEM:
             gate.value = D_Value.X
         return
 
-    def imply_all(self):
+    def imply_all(self):  # todo: check if needed
         for PI in self.Primary_Inputs:
             self.imply(PI)
 
@@ -142,7 +142,22 @@ class PODEM:
         return
 
     def check_D_in_circuit(self):
-        return
+        """
+        Check if the circuit contains a gate with D or D' value.
+
+        This function iterates through all the gates in the circuit and checks if any gate has a value of D or D'.
+
+        Returns:
+            bool: True if a gate with D or D' value is found, False otherwise.
+        """
+        # Iterate through all the gates in the circuit
+        for gate in self.circuit.gates:
+            # Check if the gate has a value of D or D'
+            if gate.value == D_Value.D or gate.value == D_Value.D_PRIME:
+                # If a gate with D or D' value is found, return True
+                return True
+        # If no gate with D or D' value is found, return False
+        return False
 
     def check_X_path_in_circuit(self):
         return
