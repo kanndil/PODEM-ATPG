@@ -139,11 +139,24 @@ class PODEM:
                 return True
 
     def ret_success_vector(self):
+        """
+        Returns the test vector for the circuit by iterating through the primary input gates
+        and appending their values to the test vector list.
+
+        Returns:
+            list: The test vector for the circuit.
+        """
+        # Initialize an empty list to store the test vector
         test_vector = []
+
+        # Iterate through the primary input gates
         for PI in self.circuit.primary_input_gates:
+            # Append the value of each primary input gate to the test vector
             test_vector.append(PI.value)
-            
+
+        # Return the test vector
         return test_vector
+
 
     def check_D_in_circuit(self):
         """
