@@ -64,43 +64,43 @@ class PODEM:
             gate.value = D_Value.X
         return
 
-    def get_gate_from_input(self, input):
-        return
-
     def imply_all(self):
         for PI in self.Primary_Inputs:
             self.imply(PI)
 
         return
 
-    def imply(self, input):
+    def imply(self, primary_input):
         """
         Propagates a primary input value to all parts of the circuit that it affects.
 
         This function starts from the primary input, simulates the gate, and recursively calls itself on the next gates.
 
         Args:
-            input (Gate): The primary input gate.
+            primary_input (Gate): The primary input gate.
+
+        Returns:
+            None
         """
-        # Get the gate corresponding to the input
-        current_gate = self.get_gate_from_input(input)
+        # Iterate over all output gates connected to the primary input
+        for next_gate in primary_input.output_gates:
 
-        # If the gate is an output, there is nothing to propagate
-        if current_gate.is_output():
-            return
+            # Store the previous output value of the gate
+            initial_output_value = next_gate.output
 
-        # Store the previous output value of the gate
-        previous_output_value = current_gate.output
+            ## Simulate the gate # todo: check if needed
+            #self.simulate_gate(next_gate)
+            
+            # Evaluate the gate
+            next_gate.evaluate()
 
-        # Simulate the gate
-        self.simulate_gate(current_gate)
-
-        # If the output value of the gate changed, propagate the change to the next gates
-        if previous_output_value != current_gate.output:
-            for next_gate in current_gate.get_next_gates():
-                self.imply(next_gate)
-
-        return
+            # If the output value of the gate changed, propagate the change to the next gates
+            if initial_output_value == next_gate.output:
+                continue
+            else:
+                # Recursively call the imply function on the next gates
+                for next_next_gate in next_gate.output_gates:
+                    self.imply(next_next_gate)
 
     def simulate_gate(self, gate):
         """
@@ -116,14 +116,14 @@ class PODEM:
             gate (Gate): The gate to be simulated.
         """
         # Break condition: return if the gate has already been simulated
-        if gate.output != D_Value.X:
+        if gate.value != D_Value.X:
             return
 
         # Make sure that the gate's inputs have are available
         # by makeing sure the previous gates have been simulated
 
-        for pre_gate in gate.get_previous_gates():
-            self.simulate_gate(pre_gate)
+        for previous_gate in gate.input_gates:
+            self.simulate_gate(previous_gate)
 
         # evaluate the gate
         gate.evaluate()
@@ -148,13 +148,13 @@ class PODEM:
         return
 
     def basic_PODEM(self):
-
         # While PI Branch-and-bound value possible
-        for input in self.Primary_Inputs:
+        for primary_input in self.Primary_Inputs:
             # Get a new PI value
             for value in [0, 1]:
                 # Imply new PI value
-                self.imply(input)
+                primary_input.value = value
+                self.imply(primary_input)
                 # If error at a PO
                 # SUCCESS; Exit;
                 if self.check_error_at_primary_outputs():
