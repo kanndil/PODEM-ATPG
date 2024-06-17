@@ -31,9 +31,6 @@ class Gate:
 
         return
 
-    def get_previous_gates(self):
-        return
-
     def evaluate(self):
         """
         Evaluates the output of the gate based on its type.
