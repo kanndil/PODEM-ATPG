@@ -1,6 +1,6 @@
 import argparse
 from PODEM import PODEM
-from Ciruit import Circuit
+from Circuit import Circuit
 
 
 def main():
