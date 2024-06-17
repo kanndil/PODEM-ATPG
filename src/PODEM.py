@@ -130,8 +130,30 @@ class PODEM:
 
         return
 
-    def backtrace(self):
-        return
+    def backtrace(self, objective_gate, objective_value):
+        
+        target_primary_input = objective_gate
+        target_primary_input_value = None
+        inversion_parity = target_primary_input.inversion_parity
+        while (target_primary_input.type != "input_pin"):
+            
+            for previous_gate in target_primary_input.input_gates:
+                if previous_gate.value == D_Value.X:
+                    target_primary_input = previous_gate
+                    break
+
+            inversion_parity += target_primary_input.inversion_parity
+            pass
+        
+        if inversion_parity%2 ==1 :
+            if objective_value == D_Value.ONE:
+                target_primary_input_value = D_Value.ZERO
+            elif objective_value == D_Value.ZERO:
+                target_primary_input_value = D_Value.ONE
+        else:
+         target_primary_input_value = objective_value
+            
+        return target_primary_input , objective_value == D_Value.ONE
 
     def check_error_at_primary_outputs(self):
         for output in self.circuit.primary_output_gates:
