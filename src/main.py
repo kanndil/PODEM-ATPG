@@ -5,17 +5,17 @@ from Circuit import Circuit
 
 def main():
     ## Initialize the argument parser
-    #parser = argparse.ArgumentParser(description="Run PODEM on a specified input file.")
+    # parser = argparse.ArgumentParser(description="Run PODEM on a specified input file.")
 
     ## Add arguments
-    #parser.add_argument(
+    # parser.add_argument(
     #    "input_file", type=str, help="The input file to be processed by PODEM"
-    #)
+    # )
 
     ## Parse arguments
-    #args = parser.parse_args()
-    #input_file = args.input_file
-    
+    # args = parser.parse_args()
+    # input_file = args.input_file
+
     input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/c17.txt"
     circuit = Circuit()
     circuit.parse_file(input_file)
@@ -28,6 +28,7 @@ def main():
 
     # Print the PODEM
     print(ret)
+
 
 if __name__ == "__main__":
     main()

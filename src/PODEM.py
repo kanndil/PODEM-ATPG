@@ -48,7 +48,7 @@ class PODEM:
             # Use the advanced Poem algorithm
             return self.advanced_PODEM()
         # Return nothing
-        return 
+        return
 
     def justify(self):
         return
@@ -131,34 +131,68 @@ class PODEM:
         return
 
     def backtrace(self, objective_gate, objective_value):
-        
+        """
+        Traverse upwards from the objective gate to find the primary input gate that affects the objective gate.
+        It tracks the inversion parity along the way.
+
+        Then, it finds the primary input gate that affects the objective gate. If the inversion parity is odd, it inverts
+        the objective value.
+        Args:
+            objective_gate (Gate): The gate that the primary input gate is affecting.
+            objective_value (D_Value): The value of the objective gate.
+
+        Returns:
+            tuple: A tuple containing the primary input gate that affects the objective gate and a boolean
+                   indicating if the objective value is D or D'.
+        """
+        # Initialize variables
         target_primary_input = objective_gate
         target_primary_input_value = None
         inversion_parity = target_primary_input.inversion_parity
-        while (target_primary_input.type != "input_pin"):
-            
+
+        # Traverse upwards from the objective gate
+        while target_primary_input.type != "input_pin":
+
+            # Find the previous gate with X value
             for previous_gate in target_primary_input.input_gates:
                 if previous_gate.value == D_Value.X:
                     target_primary_input = previous_gate
                     break
 
+            # Update the inversion parity
             inversion_parity += target_primary_input.inversion_parity
-            pass
-        
-        if inversion_parity%2 ==1 :
+
+        # Determine the target primary input value
+        if inversion_parity % 2 == 1:
             if objective_value == D_Value.ONE:
                 target_primary_input_value = D_Value.ZERO
             elif objective_value == D_Value.ZERO:
                 target_primary_input_value = D_Value.ONE
         else:
-         target_primary_input_value = objective_value
-            
-        return target_primary_input , objective_value == D_Value.ONE
+            target_primary_input_value = objective_value
+
+        # Return the target primary input gate and a boolean indicating if the objective value is D or D'
+        return target_primary_input, target_primary_input_value
 
     def check_error_at_primary_outputs(self):
-        for output in self.circuit.primary_output_gates:
-            if output == D_Value.D or output == D_Value.D_PRIME:
+        """
+        Checks if there is an error at the primary outputs of the circuit.
+
+        This function iterates through the primary output gates and checks if any of them have a value
+        of D or D'. If such a gate is found, it returns True, indicating that there is an error.
+
+        Returns:
+            bool: True if there is an error at the primary outputs, False otherwise.
+        """
+        # Iterate through the primary output gates
+        for output_gate in self.circuit.primary_output_gates:
+            # Check if the gate has a value of D or D'
+            if output_gate == D_Value.D or output_gate == D_Value.D_PRIME:
+                # If an error is found, return True
                 return True
+
+        # If no error is found, return False
+        return False
 
     def ret_success_vector(self):
         """
@@ -181,7 +215,7 @@ class PODEM:
 
     def check_D_in_circuit(self):
         """
-        Check if the circuit contains a gate with D or D' value.
+        Check if the circuit contains a gate with D or D' value. If so, check for an X path.
 
         This function iterates through all the gates in the circuit and checks if any gate has a value of D or D'.
 
@@ -224,6 +258,9 @@ class PODEM:
         return False
 
     def basic_PODEM(self):
+
+        # TODO : Given a fault F, Activate F
+
         # While PI Branch-and-bound value possible
         for primary_input in self.circuit.primary_input_gates:
             # Get a new PI value
@@ -236,10 +273,7 @@ class PODEM:
                 if self.check_error_at_primary_outputs():
                     return True, self.ret_success_vector()
                 else:
-                    if (
-                        not self.check_D_in_circuit()
-                        or not self.check_X_path_in_circuit()
-                    ):
+                    if not self.check_D_in_circuit():
                         continue
 
         return False, []

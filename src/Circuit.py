@@ -27,7 +27,6 @@ class Circuit:
         # List of all primary output gates
         self.primary_output_gates = []
 
-
         # Dictionary that maps each primary input to the corresponding gates
         self.get_gates_from_PI = {}
 
