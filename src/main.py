@@ -17,8 +17,10 @@ def main():
     # input_file = args.input_file
 
     input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/c17.txt"
+    fault_file = "---"
     circuit = Circuit()
-    circuit.parse_file(input_file)
+    circuit.parse_circuit_file(input_file)
+    circuit.parse_fault_file(fault_file)
 
     # Create PODEM agent and parse the input file
     podem_agent = PODEM(circuit=circuit)

@@ -29,10 +29,13 @@ class Circuit:
 
         # Dictionary that maps each primary input to the corresponding gates
         self.get_gates_from_PI = {}
+        
+        # List of all faults in the circuit
+        self.faults = []
 
         return
 
-    def parse_file(self, filename):
+    def parse_circuit_file(self, filename):
         """
         Parses a text file describing a circuit and adds the gates to the circuit.
 
@@ -172,3 +175,33 @@ class Circuit:
             print(gate.inputs)
             print(gate.outputs)
             print()
+
+
+
+    def parse_fault_file(self, fault_file):
+        """
+        Parses a fault file and stores the fault information in the circuit object.
+
+        Args:
+            fault_file (str): The path to the fault file.
+
+        Returns:
+            None
+        """
+        # Open the fault file
+        with open(fault_file, 'r') as file:
+            # Read all the lines from the file
+            lines = file.readlines()
+
+            # Iterate through the lines two at a time
+            for i in range(0, len(lines), 2):
+                # Get the net name from the first line
+                net_name = lines[i].strip()
+                # Get the fault value from the second line and convert it to an integer
+                fault_value = int(lines[i+1].strip())
+                # Append the net name and fault value to the circuit's faults list
+                self.faults.append((net_name, fault_value))
+
+        # Return None, as this function does not return anything
+        return
+    
