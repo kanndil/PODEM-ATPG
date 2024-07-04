@@ -43,7 +43,7 @@ class PODEM:
         # Use the specified algorithm to compute the PODEM
         if algorithm == "basic":
             # Use the basic POem algorithm
-            return self.basic_PODEM()
+            return self.basic_PODEM(self.circuit.faults[0])
         elif algorithm == "advanced":
             # Use the advanced Poem algorithm
             return self.advanced_PODEM()
@@ -257,9 +257,9 @@ class PODEM:
         # If no X path is found, return False
         return False
 
-    def basic_PODEM(self):
+    def basic_PODEM(self, fault):
 
-        # TODO : Given a fault F, Activate F
+        self.activate_fault(fault)
 
         # While PI Branch-and-bound value possible
         for primary_input in self.circuit.primary_input_gates:
@@ -279,4 +279,20 @@ class PODEM:
         return False, []
 
     def advanced_PODEM(self):
+        return
+
+    def activate_fault(self, fault):
+        
+        fault_site = fault[0]
+        fault_value = fault[1]
+        
+        faulty_gate = self.circuit.gates[fault_site]
+        
+        target_primary_input, target_primary_input_value = self.backtrace(faulty_gate, fault_value)
+        
+        target_primary_input.value = target_primary_input_value
+        self.imply(target_primary_input)
+        
+        
+        
         return
