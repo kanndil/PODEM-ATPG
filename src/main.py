@@ -17,7 +17,7 @@ def main():
     # input_file = args.input_file
 
     input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/c17.txt"
-    fault_file = "---"
+    fault_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/c17.fault"
     circuit = Circuit()
     circuit.parse_circuit_file(input_file)
     circuit.parse_fault_file(fault_file)
