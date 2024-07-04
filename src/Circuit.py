@@ -114,7 +114,7 @@ class Circuit:
 
         if type != "output_pin":
             # Add the gate to the dictionary of gates based on the output id
-            self.gates[output_pin_id] = gate
+            self.gates[str(output_pin_id)] = gate
 
         self.index_id += 1
         return
