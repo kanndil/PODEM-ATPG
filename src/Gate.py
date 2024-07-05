@@ -21,6 +21,8 @@ class Gate:
             self.inversion_parity = 1
         else:
             self.inversion_parity = 0
+            
+        self.explored = False
 
         # Distance Parameters
         self.PI_distance = 0
@@ -50,7 +52,11 @@ class Gate:
         Returns:
             None
         """
-        if self.type == "AND":
+        if self.type == "input_pin":
+            pass
+        elif self.type == "output_pin":
+            self.value = self.input_gates[0].value
+        elif self.type == "AND":
             self.value = self.evaluate_and()
         elif self.type == "OR":
             self.value = self.evaluate_or()
@@ -68,8 +74,18 @@ class Gate:
 
 
         if self.faulty:
-            self.value[1] = self.fault_value[1]
-                
+            tempval = [self.value.value[1], self.fault_value.value[1]]
+            if tempval  == [1,0]:
+                self.value = D_Value.D
+            elif tempval == [0,1]:
+                self.value = D_Value.D_PRIME
+            elif tempval == [0,0]:
+                self.value = D_Value.ZERO
+            elif tempval == [1,1]:
+                self.value = D_Value.ONE
+            elif "X" in tempval :
+                self.value = D_Value.X
+                      
         return
 
     def evaluate_and(self):

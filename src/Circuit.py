@@ -169,13 +169,15 @@ class Circuit:
                 # Connect the previous gate to the current gate as an output gate
                 previous_gate.output_gates.append(current_gate)
 
-    def print_graph(self):
+    def print_circuit(self):
+        
+        print("--------------------------- ---------------------------")
         for gate in self.gates.values():
             print(gate.type, gate.id)
-            print(gate.inputs)
-            print(gate.outputs)
+            print(gate.type)
+            print(gate.value)
             print()
-
+        print("---------------------------")
 
 
     def parse_fault_file(self, fault_file):

@@ -39,6 +39,9 @@ class PODEM:
             None
 
         """
+        
+        self.init_PODEM()
+        
         # algorithm = "basic" or "advanced"
         # Use the specified algorithm to compute the PODEM
         if algorithm == "basic":
@@ -53,15 +56,19 @@ class PODEM:
     def justify(self):
         return
 
-    def X_init(self):
+    def init_PODEM(self):
         """
         Initializes the output of each gate to X.
 
         This function iterates through all the gates in the circuit and sets their output to X.
         """
-        for gate in self.circuit.gates:
+        for gate in self.circuit.gates.values():
             # Set the output of each gate to X
             gate.value = D_Value.X
+            
+        for PI in self.circuit.primary_input_gates:
+            PI.explored = False
+            
         return
 
     def imply_all(self):  # todo: check if needed
@@ -70,9 +77,9 @@ class PODEM:
 
         return
 
-    def imply(self, primary_input):
+    def imply(self, _input_gate):
         """
-        Propagates a primary input value to all parts of the circuit that it affects.
+        Propagates a _input_gate's value to all parts of the circuit that it affects.
 
         This function starts from the primary input, simulates the gate, and recursively calls itself on the next gates.
 
@@ -82,25 +89,18 @@ class PODEM:
         Returns:
             None
         """
-        # Iterate over all output gates connected to the primary input
-        for next_gate in primary_input.output_gates:
-
-            # Store the previous output value of the gate
-            initial_output_value = next_gate.output
-
+        initial_output_value = _input_gate.value
+        _input_gate.evaluate()
+        
             ## Simulate the gate # todo: check if needed
             # self.simulate_gate(next_gate)
-
-            # Evaluate the gate
-            next_gate.evaluate()
-
-            # If the output value of the gate changed, propagate the change to the next gates
-            if initial_output_value == next_gate.output:
-                continue
-            else:
-                # Recursively call the imply function on the next gates
-                for next_next_gate in next_gate.output_gates:
-                    self.imply(next_next_gate)
+            
+        if initial_output_value == _input_gate.value:
+            return
+        
+        # Iterate over all output gates connected to the primary input
+        for next_gate in _input_gate.output_gates:
+            self.imply(next_gate)
 
     def simulate_gate(self, gate):
         """
@@ -263,8 +263,12 @@ class PODEM:
 
         # While PI Branch-and-bound value possible
         for primary_input in self.circuit.primary_input_gates:
+            if primary_input.explored:
+                continue
             # Get a new PI value
-            for value in [0, 1]:
+            for value in [D_Value.ZERO, D_Value.ONE]:
+                self.circuit.print_circuit()
+                primary_input.explored = True
                 # Imply new PI value
                 primary_input.value = value
                 self.imply(primary_input)
@@ -284,15 +288,19 @@ class PODEM:
     def activate_fault(self, fault):
         
         fault_site = fault[0]
-        fault_value = fault[1]
-        
         faulty_gate = self.circuit.gates[fault_site]
+        faulty_gate.faulty = True
+        if fault[1] == 0:
+            fault_value = D_Value.ONE
+            faulty_gate.fault_value = D_Value.D
+        elif fault[1] == 1:
+            fault_value = D_Value.ZERO
+            faulty_gate.fault_value = D_Value.D_PRIME
         
         target_primary_input, target_primary_input_value = self.backtrace(faulty_gate, fault_value)
         
         target_primary_input.value = target_primary_input_value
         self.imply(target_primary_input)
-        
-        
+        target_primary_input.explored = True
         
         return
