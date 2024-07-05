@@ -39,18 +39,20 @@ class PODEM:
             None
 
         """
+        for fault in self.circuit.faults:
+            self.init_PODEM()
+            # Use the specified algorithm to compute the PODEM
+            if algorithm == "basic":
+                # Use the basic POem algorithm
+                ret = self.basic_PODEM(fault)
+                print("Fault: ", fault)
+                print("test vector: ", ret)
+            elif algorithm == "advanced":
+                # Use the advanced Poem algorithm
+                ret = self.advanced_PODEM(fault)
+                print("Fault: ", fault)
+                print("test vector: ", ret)
         
-        self.init_PODEM()
-        
-        # algorithm = "basic" or "advanced"
-        # Use the specified algorithm to compute the PODEM
-        if algorithm == "basic":
-            # Use the basic POem algorithm
-            return self.basic_PODEM(self.circuit.faults[10])
-        elif algorithm == "advanced":
-            # Use the advanced Poem algorithm
-            return self.advanced_PODEM()
-        # Return nothing
         return
 
     def justify(self):
@@ -203,12 +205,12 @@ class PODEM:
             list: The test vector for the circuit.
         """
         # Initialize an empty list to store the test vector
-        test_vector = []
+        test_vector = ""
 
         # Iterate through the primary input gates
         for PI in self.circuit.primary_input_gates:
             # Append the value of each primary input gate to the test vector
-            test_vector.append(PI.value)
+            test_vector += str(PI.value.value[0])
 
         # Return the test vector
         return test_vector
@@ -274,7 +276,7 @@ class PODEM:
                 self.imply(primary_input)
                 # If error at a PO
                 # SUCCESS; Exit;
-                self.circuit.print_circuit()
+                #self.circuit.print_circuit()
                 if self.check_error_at_primary_outputs():
                     return True, self.ret_success_vector()
                 else:
@@ -283,7 +285,7 @@ class PODEM:
 
 
 
-        return False, []
+        return False, ""
 
     def advanced_PODEM(self):
         return
