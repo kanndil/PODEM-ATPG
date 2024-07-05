@@ -75,7 +75,7 @@ class Circuit:
                         [
                             str(output_match.group(1)).strip(),
                         ],
-                        str(output_match.group(1)).strip(),
+                        "output_pin_"+str(output_match.group(1)).strip(),
                     )
 
                 # Check if the line matches a gate pattern
@@ -112,9 +112,9 @@ class Circuit:
         elif type == "output_pin":
             self.primary_output_gates.append(gate)
 
-        if type != "output_pin":
-            # Add the gate to the dictionary of gates based on the output id
-            self.gates[str(output_pin_id)] = gate
+ 
+        # Add the gate to the dictionary of gates based on the output id
+        self.gates[str(output_pin_id)] = gate
 
         self.index_id += 1
         return
