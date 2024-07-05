@@ -65,7 +65,7 @@ class Circuit:
                 # Check if the line matches an input gate pattern
                 elif input_match := input_pattern.match(line):
                     # Add the input gate id to the list of primary input gates
-                    self.add_gate("input_pin", [], int(input_match.group(1)))
+                    self.add_gate("input_pin", [], str(input_match.group(1)).strip())
 
                 # Check if the line matches an output gate pattern
                 elif output_match := output_pattern.match(line):
@@ -73,17 +73,17 @@ class Circuit:
                     self.add_gate(
                         "output_pin",
                         [
-                            int(output_match.group(1)),
+                            str(output_match.group(1)).strip(),
                         ],
-                        int(output_match.group(1)),
+                        str(output_match.group(1)).strip(),
                     )
 
                 # Check if the line matches a gate pattern
                 elif gate_match := gate_pattern.match(line):
                     # Extract the gate information
-                    gate_output = int(gate_match.group(1))
-                    gate_type = gate_match.group(2)
-                    gate_inputs = list(map(int, gate_match.group(3).split(",")))
+                    gate_output = str(gate_match.group(1)).strip()
+                    gate_type = gate_match.group(2).strip()
+                    gate_inputs = list(map(lambda x: x.strip(), gate_match.group(3).split(",")))
                     # Add the gate to the circuit
                     self.add_gate(gate_type, gate_inputs, gate_output)
 
@@ -157,7 +157,7 @@ class Circuit:
         # Iterate over each gate in the circuit
         for current_gate in self.gates.values():
             # Get the input pins of the gate
-            input_ids = current_gate.input_gates
+            input_ids = current_gate.input_gates[:]
             # Clear the list of input gates
             current_gate.input_gates.clear()
             # Iterate over each input pin
@@ -165,9 +165,9 @@ class Circuit:
                 # Retrieve the corresponding previoud gate from the circuit's dictionary of gates
                 previous_gate = self.gates[input_id]
                 # Connect the current gate to the previous gate as an input gate
-                current_gate.inputs.append(previous_gate)
+                current_gate.input_gates.append(previous_gate)
                 # Connect the previous gate to the current gate as an output gate
-                previous_gate.outputs.append(current_gate)
+                previous_gate.output_gates.append(current_gate)
 
     def print_graph(self):
         for gate in self.gates.values():
