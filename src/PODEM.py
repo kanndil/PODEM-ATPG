@@ -46,7 +46,7 @@ class PODEM:
         # Use the specified algorithm to compute the PODEM
         if algorithm == "basic":
             # Use the basic POem algorithm
-            return self.basic_PODEM(self.circuit.faults[0])
+            return self.basic_PODEM(self.circuit.faults[10])
         elif algorithm == "advanced":
             # Use the advanced Poem algorithm
             return self.advanced_PODEM()
@@ -95,7 +95,7 @@ class PODEM:
             ## Simulate the gate # todo: check if needed
             # self.simulate_gate(next_gate)
             
-        if initial_output_value == _input_gate.value:
+        if initial_output_value == _input_gate.value and _input_gate.type != "input_pin":
             return
         
         # Iterate over all output gates connected to the primary input
@@ -187,7 +187,7 @@ class PODEM:
         # Iterate through the primary output gates
         for output_gate in self.circuit.primary_output_gates:
             # Check if the gate has a value of D or D'
-            if output_gate == D_Value.D or output_gate == D_Value.D_PRIME:
+            if output_gate.value == D_Value.D or output_gate.value == D_Value.D_PRIME:
                 # If an error is found, return True
                 return True
 
@@ -267,18 +267,21 @@ class PODEM:
                 continue
             # Get a new PI value
             for value in [D_Value.ZERO, D_Value.ONE]:
-                self.circuit.print_circuit()
+                
                 primary_input.explored = True
                 # Imply new PI value
                 primary_input.value = value
                 self.imply(primary_input)
                 # If error at a PO
                 # SUCCESS; Exit;
+                self.circuit.print_circuit()
                 if self.check_error_at_primary_outputs():
                     return True, self.ret_success_vector()
                 else:
-                    if not self.check_D_in_circuit():
-                        continue
+                    if  self.check_D_in_circuit():
+                        break
+
+
 
         return False, []
 

@@ -173,7 +173,7 @@ class Circuit:
         
         print("--------------------------- ---------------------------")
         for gate in self.gates.values():
-            print(gate.type, gate.id)
+            print(gate.outputpin)
             print(gate.type)
             print(gate.value)
             print()
