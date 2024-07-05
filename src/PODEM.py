@@ -39,16 +39,18 @@ class PODEM:
             None
 
         """
-        for fault in self.circuit.faults:
-            self.init_PODEM()
-            # Use the specified algorithm to compute the PODEM
-            if algorithm == "basic":
+
+        self.circuit.calculate_SCOAP()
+        if algorithm == "basic":
+            for fault in self.circuit.faults:
+                self.init_PODEM()
                 # Use the basic POem algorithm
                 ret = self.basic_PODEM(fault)
                 print("Fault: ", fault)
                 print("test vector: ", ret)
-            elif algorithm == "advanced":
-                # Use the advanced Poem algorithm
+        elif algorithm == "advanced":
+            for fault in self.circuit.faults:
+                self.init_PODEM()
                 ret = self.advanced_PODEM(fault)
                 print("Fault: ", fault)
                 print("test vector: ", ret)

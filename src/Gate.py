@@ -311,3 +311,49 @@ class Gate:
         not_gate.evaluate()  # Evaluate the NOT gate
 
         return not_gate.value  # Return the value of the NOT gate
+
+    def calculate_CC0(self):
+        res = 0
+        if self.type == "AND":
+            res = min(g.CC0 for g in self.input_gates)+1
+        elif self.type == "NAND":
+            res = sum(g.CC1 for g in self.input_gates)+1
+        elif self.type == "OR":
+            res = sum(g.CC0 for g in self.input_gates)+1
+        elif self.type == "NOR":
+            res = min(g.CC1 for g in self.input_gates)+1
+        elif self.type == "XOR": # todo: support multiple inputs
+            res = min (self.input_gates[0].CC0 + self.input_gates[1].CC0, self.input_gates[0].CC1 + self.input_gates[1].CC1) + 1
+        elif self.type == "XNOR": # todo: support multiple inputs
+            res = min (self.input_gates[0].CC1 + self.input_gates[1].CC0, self.input_gates[0].CC0 + self.input_gates[1].CC1) + 1
+        elif self.type == "NOT":
+            res = self.input_gates[0].CC1 + 1
+        elif self.type == "input_pin":
+            res = 1
+        elif self.type == "output_pin":
+            res = min(g.CC0 for g in self.input_gates)
+        
+        self.CC0 = res
+        
+    def calculate_CC1(self):
+        res = -1
+        if self.type == "AND":
+            res = sum(g.CC1 for g in self.input_gates)+1
+        elif self.type == "NAND":
+            res = min(g.CC0 for g in self.input_gates)+1
+        elif self.type == "OR":
+            res = min(g.CC1 for g in self.input_gates)+1
+        elif self.type == "NOR":
+            res = sum(g.CC0 for g in self.input_gates)+1
+        elif self.type == "XOR": # todo: support multiple inputs
+            res = min (self.input_gates[0].CC0 + self.input_gates[1].CC1, self.input_gates[0].CC1 + self.input_gates[1].CC0) + 1
+        elif self.type == "XNOR": # todo: support multiple inputs
+            res = min (self.input_gates[0].CC0 + self.input_gates[1].CC0, self.input_gates[0].CC1 + self.input_gates[1].CC1) + 1
+        elif self.type == "NOT":
+            res = self.input_gates[0].CC0 + 1
+        elif self.type == "input_pin":
+            res = 1
+        elif self.type == "output_pin":
+            res = min(g.CC1 for g in self.input_gates)
+
+        self.CC1 = res

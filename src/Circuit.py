@@ -207,3 +207,30 @@ class Circuit:
         # Return None, as this function does not return anything
         return
     
+    def calculate_SCOAP(self):
+        self.calculate_SCOAP_controlability()
+        self.calculate_SCOAP_observability()
+    
+    def calculate_SCOAP_controlability(self):
+        
+        for pi in self.primary_input_gates:
+            self._SCOAP_controlability_recursive(pi)
+            
+        return
+    
+    
+    def _SCOAP_controlability_recursive(self,  gate):
+        if gate.explored:
+            return
+        if any(not g.explored for g in gate.input_gates):
+            return
+        
+        gate.calculate_CC0()
+        gate.calculate_CC1()
+        gate.explored = True
+        
+        for g in gate.output_gates:
+            self._SCOAP_controlability_recursive(g)
+        return
+    def calculate_SCOAP_observability(self):
+        pass
