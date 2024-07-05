@@ -54,7 +54,7 @@ class PODEM:
                 ret = self.advanced_PODEM(fault)
                 print("Fault: ", fault)
                 print("test vector: ", ret)
-        
+
         return
 
     def justify(self):
@@ -69,10 +69,10 @@ class PODEM:
         for gate in self.circuit.gates.values():
             # Set the output of each gate to X
             gate.value = D_Value.X
-            
+
         for PI in self.circuit.primary_input_gates:
             PI.explored = False
-            
+
         return
 
     def imply_all(self):  # todo: check if needed
@@ -95,13 +95,16 @@ class PODEM:
         """
         initial_output_value = _input_gate.value
         _input_gate.evaluate()
-        
-            ## Simulate the gate # todo: check if needed
-            # self.simulate_gate(next_gate)
-            
-        if initial_output_value == _input_gate.value and _input_gate.type != "input_pin":
+
+        ## Simulate the gate # todo: check if needed
+        # self.simulate_gate(next_gate)
+
+        if (
+            initial_output_value == _input_gate.value
+            and _input_gate.type != "input_pin"
+        ):
             return
-        
+
         # Iterate over all output gates connected to the primary input
         for next_gate in _input_gate.output_gates:
             self.imply(next_gate)
@@ -271,21 +274,19 @@ class PODEM:
                 continue
             # Get a new PI value
             for value in [D_Value.ZERO, D_Value.ONE]:
-                
+
                 primary_input.explored = True
                 # Imply new PI value
                 primary_input.value = value
                 self.imply(primary_input)
                 # If error at a PO
                 # SUCCESS; Exit;
-                #self.circuit.print_circuit()
+                # self.circuit.print_circuit()
                 if self.check_error_at_primary_outputs():
                     return True, self.ret_success_vector()
                 else:
-                    if  self.check_D_in_circuit():
+                    if self.check_D_in_circuit():
                         break
-
-
 
         return False, ""
 
@@ -293,7 +294,7 @@ class PODEM:
         return
 
     def activate_fault(self, fault):
-        
+
         fault_site = fault[0]
         faulty_gate = self.circuit.gates[fault_site]
         faulty_gate.faulty = True
@@ -303,11 +304,13 @@ class PODEM:
         elif fault[1] == 1:
             fault_value = D_Value.ZERO
             faulty_gate.fault_value = D_Value.D_PRIME
-        
-        target_primary_input, target_primary_input_value = self.backtrace(faulty_gate, fault_value)
-        
+
+        target_primary_input, target_primary_input_value = self.backtrace(
+            faulty_gate, fault_value
+        )
+
         target_primary_input.value = target_primary_input_value
         self.imply(target_primary_input)
         target_primary_input.explored = True
-        
+
         return

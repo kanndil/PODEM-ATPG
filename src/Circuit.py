@@ -29,7 +29,7 @@ class Circuit:
 
         # Dictionary that maps each primary input to the corresponding gates
         self.get_gates_from_PI = {}
-        
+
         # List of all faults in the circuit
         self.faults = []
 
@@ -75,7 +75,7 @@ class Circuit:
                         [
                             str(output_match.group(1)).strip(),
                         ],
-                        "output_pin_"+str(output_match.group(1)).strip(),
+                        "output_pin_" + str(output_match.group(1)).strip(),
                     )
 
                 # Check if the line matches a gate pattern
@@ -83,7 +83,9 @@ class Circuit:
                     # Extract the gate information
                     gate_output = str(gate_match.group(1)).strip()
                     gate_type = gate_match.group(2).strip()
-                    gate_inputs = list(map(lambda x: x.strip(), gate_match.group(3).split(",")))
+                    gate_inputs = list(
+                        map(lambda x: x.strip(), gate_match.group(3).split(","))
+                    )
                     # Add the gate to the circuit
                     self.add_gate(gate_type, gate_inputs, gate_output)
 
@@ -112,7 +114,6 @@ class Circuit:
         elif type == "output_pin":
             self.primary_output_gates.append(gate)
 
- 
         # Add the gate to the dictionary of gates based on the output id
         self.gates[str(output_pin_id)] = gate
 
@@ -170,7 +171,7 @@ class Circuit:
                 previous_gate.output_gates.append(current_gate)
 
     def print_circuit(self):
-        
+
         print("--------------------------- ---------------------------")
         for gate in self.gates.values():
             print(gate.outputpin)
@@ -178,7 +179,6 @@ class Circuit:
             print(gate.value)
             print()
         print("---------------------------")
-
 
     def parse_fault_file(self, fault_file):
         """
@@ -191,7 +191,7 @@ class Circuit:
             None
         """
         # Open the fault file
-        with open(fault_file, 'r') as file:
+        with open(fault_file, "r") as file:
             # Read all the lines from the file
             lines = file.readlines()
 
@@ -200,33 +200,33 @@ class Circuit:
                 # Get the net name from the first line
                 net_name = lines[i].strip()
                 # Get the fault value from the second line and convert it to an integer
-                fault_value = int(lines[i+1].strip())
+                fault_value = int(lines[i + 1].strip())
                 # Append the net name and fault value to the circuit's faults list
                 self.faults.append((net_name, fault_value))
 
         # Return None, as this function does not return anything
         return
-    
+
     def calculate_SCOAP(self):
         self.calculate_SCOAP_controlability()
         self.reset_explored()
         self.calculate_SCOAP_observability()
-    
+
     def calculate_SCOAP_controlability(self):
         for pi in self.primary_input_gates:
-            self._SCOAP_controlability_recursive(pi)    
+            self._SCOAP_controlability_recursive(pi)
         return
-    
-    def _SCOAP_controlability_recursive(self,  gate):
+
+    def _SCOAP_controlability_recursive(self, gate):
         if gate.explored:
             return
         if any(not g.explored for g in gate.input_gates):
             return
-        
+
         gate.calculate_CC0()
         gate.calculate_CC1()
         gate.explored = True
-        
+
         for g in gate.output_gates:
             self._SCOAP_controlability_recursive(g)
         return
@@ -235,21 +235,21 @@ class Circuit:
         for po in self.primary_output_gates:
             self._SCOAP_observability_recursive(po)
         return
-    
-    def _SCOAP_observability_recursive(self,  gate):
+
+    def _SCOAP_observability_recursive(self, gate):
         if gate.explored:
             return
         if any(not g.explored for g in gate.output_gates):
             return
-        
+
         gate.calculate_CCb()
         gate.explored = True
-        
+
         for g in gate.input_gates:
             self._SCOAP_observability_recursive(g)
-        
+
         return
-    
+
     def reset_explored(self):
         for gate in self.gates.values():
             gate.explored = False

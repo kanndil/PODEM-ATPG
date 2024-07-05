@@ -21,7 +21,7 @@ class Gate:
             self.inversion_parity = 1
         else:
             self.inversion_parity = 0
-            
+
         self.explored = False
 
         # Distance Parameters
@@ -71,21 +71,19 @@ class Gate:
         elif self.type == "XNOR":
             self.value = self.evaluate_xnor()
 
-
-
         if self.faulty:
             tempval = [self.value.value[1], self.fault_value.value[1]]
-            if tempval  == [1,0]:
+            if tempval == [1, 0]:
                 self.value = D_Value.D
-            elif tempval == [0,1]:
+            elif tempval == [0, 1]:
                 self.value = D_Value.D_PRIME
-            elif tempval == [0,0]:
+            elif tempval == [0, 0]:
                 self.value = D_Value.ZERO
-            elif tempval == [1,1]:
+            elif tempval == [1, 1]:
                 self.value = D_Value.ONE
-            elif "X" in tempval :
+            elif "X" in tempval:
                 self.value = D_Value.X
-                      
+
         return
 
     def evaluate_and(self):
@@ -103,10 +101,10 @@ class Gate:
         Returns:
             D_Value: The value value of the AND gate.
         """
-        temp_input_gates=[]
+        temp_input_gates = []
         for g in self.input_gates:
             temp_input_gates.append(g.value)
-        
+
         # Check if any input is ZERO
         if D_Value.ZERO in temp_input_gates:
             return D_Value.ZERO
@@ -147,7 +145,7 @@ class Gate:
         Returns:
             D_Value: The value value of the OR gate.
         """
-        temp_input_gates=[]
+        temp_input_gates = []
         for g in self.input_gates:
             temp_input_gates.append(g.value)
         # Check if any input is ONE
@@ -187,7 +185,7 @@ class Gate:
         Returns:
             D_Value: The value value of the XOR gate.
         """
-        temp_input_gates=[]
+        temp_input_gates = []
         for g in self.input_gates:
             temp_input_gates.append(g.value)
         # Count the occurrences of D and D_PRIME
@@ -238,7 +236,7 @@ class Gate:
         Returns:
             D_Value: The value value of the NOT gate.
         """
-        temp_input_gates=[]
+        temp_input_gates = []
         for g in self.input_gates:
             temp_input_gates.append(g.value)
         # Check the input value
@@ -315,40 +313,64 @@ class Gate:
     def calculate_CC0(self):
         res = 0
         if self.type == "AND":
-            res = min(g.CC0 for g in self.input_gates)+1
+            res = min(g.CC0 for g in self.input_gates) + 1
         elif self.type == "NAND":
-            res = sum(g.CC1 for g in self.input_gates)+1
+            res = sum(g.CC1 for g in self.input_gates) + 1
         elif self.type == "OR":
-            res = sum(g.CC0 for g in self.input_gates)+1
+            res = sum(g.CC0 for g in self.input_gates) + 1
         elif self.type == "NOR":
-            res = min(g.CC1 for g in self.input_gates)+1
-        elif self.type == "XOR": # todo: support multiple inputs
-            res = min (self.input_gates[0].CC0 + self.input_gates[1].CC0, self.input_gates[0].CC1 + self.input_gates[1].CC1) + 1
-        elif self.type == "XNOR": # todo: support multiple inputs
-            res = min (self.input_gates[0].CC1 + self.input_gates[1].CC0, self.input_gates[0].CC0 + self.input_gates[1].CC1) + 1
+            res = min(g.CC1 for g in self.input_gates) + 1
+        elif self.type == "XOR":  # todo: support multiple inputs
+            res = (
+                min(
+                    self.input_gates[0].CC0 + self.input_gates[1].CC0,
+                    self.input_gates[0].CC1 + self.input_gates[1].CC1,
+                )
+                + 1
+            )
+        elif self.type == "XNOR":  # todo: support multiple inputs
+            res = (
+                min(
+                    self.input_gates[0].CC1 + self.input_gates[1].CC0,
+                    self.input_gates[0].CC0 + self.input_gates[1].CC1,
+                )
+                + 1
+            )
         elif self.type == "NOT":
             res = self.input_gates[0].CC1 + 1
         elif self.type == "input_pin":
             res = 1
         elif self.type == "output_pin":
             res = min(g.CC0 for g in self.input_gates)
-        
+
         self.CC0 = res
-        
+
     def calculate_CC1(self):
         res = -1
         if self.type == "AND":
-            res = sum(g.CC1 for g in self.input_gates)+1
+            res = sum(g.CC1 for g in self.input_gates) + 1
         elif self.type == "NAND":
-            res = min(g.CC0 for g in self.input_gates)+1
+            res = min(g.CC0 for g in self.input_gates) + 1
         elif self.type == "OR":
-            res = min(g.CC1 for g in self.input_gates)+1
+            res = min(g.CC1 for g in self.input_gates) + 1
         elif self.type == "NOR":
-            res = sum(g.CC0 for g in self.input_gates)+1
-        elif self.type == "XOR": # todo: support multiple inputs
-            res = min (self.input_gates[0].CC0 + self.input_gates[1].CC1, self.input_gates[0].CC1 + self.input_gates[1].CC0) + 1
-        elif self.type == "XNOR": # todo: support multiple inputs
-            res = min (self.input_gates[0].CC0 + self.input_gates[1].CC0, self.input_gates[0].CC1 + self.input_gates[1].CC1) + 1
+            res = sum(g.CC0 for g in self.input_gates) + 1
+        elif self.type == "XOR":  # todo: support multiple inputs
+            res = (
+                min(
+                    self.input_gates[0].CC0 + self.input_gates[1].CC1,
+                    self.input_gates[0].CC1 + self.input_gates[1].CC0,
+                )
+                + 1
+            )
+        elif self.type == "XNOR":  # todo: support multiple inputs
+            res = (
+                min(
+                    self.input_gates[0].CC0 + self.input_gates[1].CC0,
+                    self.input_gates[0].CC1 + self.input_gates[1].CC1,
+                )
+                + 1
+            )
         elif self.type == "NOT":
             res = self.input_gates[0].CC0 + 1
         elif self.type == "input_pin":
@@ -357,26 +379,26 @@ class Gate:
             res = min(g.CC1 for g in self.input_gates)
 
         self.CC1 = res
-        
+
     def calculate_CCb(self):
         res = -1
         CCb_output = 0
         if self.output_gates:
             CCb_output = min(g.CCb for g in self.output_gates)
         if self.type == "AND":
-            res =CCb_output + sum(g.CC1 for g in self.input_gates) + 1
+            res = CCb_output + sum(g.CC1 for g in self.input_gates) + 1
         elif self.type == "NAND":
-            res =CCb_output + sum(g.CC1 for g in self.input_gates) + 1
+            res = CCb_output + sum(g.CC1 for g in self.input_gates) + 1
         elif self.type == "OR":
-            res =CCb_output + sum(g.CC0 for g in self.input_gates) + 1
+            res = CCb_output + sum(g.CC0 for g in self.input_gates) + 1
         elif self.type == "NOR":
-            res =CCb_output + sum(g.CC0 for g in self.input_gates) + 1
-        elif self.type == "XOR": # todo: support XOR
+            res = CCb_output + sum(g.CC0 for g in self.input_gates) + 1
+        elif self.type == "XOR":  # todo: support XOR
             pass
-        elif self.type == "XNOR": # todo: support XNOR
+        elif self.type == "XNOR":  # todo: support XNOR
             pass
         elif self.type == "NOT":
-            res = CCb_output+1
+            res = CCb_output + 1
         elif self.type == "input_pin":
             res = CCb_output
         elif self.type == "output_pin":

@@ -29,6 +29,5 @@ def main():
     podem_agent.compute(algorithm="basic")
 
 
-
 if __name__ == "__main__":
     main()
