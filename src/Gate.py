@@ -357,3 +357,29 @@ class Gate:
             res = min(g.CC1 for g in self.input_gates)
 
         self.CC1 = res
+        
+    def calculate_CCb(self):
+        res = -1
+        CCb_output = 0
+        if self.output_gates:
+            CCb_output = min(g.CCb for g in self.output_gates)
+        if self.type == "AND":
+            res =CCb_output + sum(g.CC1 for g in self.input_gates) + 1
+        elif self.type == "NAND":
+            res =CCb_output + sum(g.CC1 for g in self.input_gates) + 1
+        elif self.type == "OR":
+            res =CCb_output + sum(g.CC0 for g in self.input_gates) + 1
+        elif self.type == "NOR":
+            res =CCb_output + sum(g.CC0 for g in self.input_gates) + 1
+        elif self.type == "XOR": # todo: support XOR
+            pass
+        elif self.type == "XNOR": # todo: support XNOR
+            pass
+        elif self.type == "NOT":
+            res = CCb_output+1
+        elif self.type == "input_pin":
+            res = CCb_output
+        elif self.type == "output_pin":
+            res = 0
+
+        self.CCb = res

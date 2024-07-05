@@ -209,15 +209,13 @@ class Circuit:
     
     def calculate_SCOAP(self):
         self.calculate_SCOAP_controlability()
+        self.reset_explored()
         self.calculate_SCOAP_observability()
     
     def calculate_SCOAP_controlability(self):
-        
         for pi in self.primary_input_gates:
-            self._SCOAP_controlability_recursive(pi)
-            
+            self._SCOAP_controlability_recursive(pi)    
         return
-    
     
     def _SCOAP_controlability_recursive(self,  gate):
         if gate.explored:
@@ -232,5 +230,26 @@ class Circuit:
         for g in gate.output_gates:
             self._SCOAP_controlability_recursive(g)
         return
+
     def calculate_SCOAP_observability(self):
-        pass
+        for po in self.primary_output_gates:
+            self._SCOAP_observability_recursive(po)
+        return
+    
+    def _SCOAP_observability_recursive(self,  gate):
+        if gate.explored:
+            return
+        if any(not g.explored for g in gate.output_gates):
+            return
+        
+        gate.calculate_CCb()
+        gate.explored = True
+        
+        for g in gate.input_gates:
+            self._SCOAP_observability_recursive(g)
+        
+        return
+    
+    def reset_explored(self):
+        for gate in self.gates.values():
+            gate.explored = False
