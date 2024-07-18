@@ -153,34 +153,33 @@ class PODEM:
                    indicating if the objective value is D or D'.
         """
         # Initialize variables
-        target_primary_input = objective_gate
-        target_primary_input_value = None
-        inversion_parity = target_primary_input.inversion_parity
+        target_PI = objective_gate
+        target_PI_value = None
+        inversion_parity = target_PI.inversion_parity
 
         # Traverse upwards from the objective gate
-        while target_primary_input.type != "input_pin":
+        while target_PI.type != "input_pin":
 
             # Find the previous gate with X value
-            for previous_gate in target_primary_input.input_gates:
+            for previous_gate in target_PI.input_gates:
                 if previous_gate.value == D_Value.X:
-                    target_primary_input = previous_gate
+                    target_PI = previous_gate
                     break
 
             # Update the inversion parity
-            inversion_parity += target_primary_input.inversion_parity
+            inversion_parity += target_PI.inversion_parity
 
         # Determine the target primary input value
         if inversion_parity % 2 == 1:
             if objective_value == D_Value.ONE:
-                target_primary_input_value = D_Value.ZERO
+                target_PI_value = D_Value.ZERO
             elif objective_value == D_Value.ZERO:
-                target_primary_input_value = D_Value.ONE
+                target_PI_value = D_Value.ONE
         else:
-            target_primary_input_value = objective_value
+            target_PI_value = objective_value
 
         # Return the target primary input gate and a boolean indicating if the objective value is D or D'
-        return target_primary_input, target_primary_input_value
-
+        return target_PI, target_PI_value
     def check_error_at_primary_outputs(self):
         """
         Checks if there is an error at the primary outputs of the circuit.
@@ -293,11 +292,22 @@ class PODEM:
     def advanced_PODEM(self):
         return
 
-    def activate_fault(self, fault):
+def activate_fault(self, fault):
+        """
+        Activate the specified fault in the circuit.
 
+        Args:
+            fault (Tuple): A tuple containing the fault site and fault type.
+
+        Returns:
+            None
+        """
+        # Extract relevant information from the fault tuple
         fault_site = fault[0]
         faulty_gate = self.circuit.gates[fault_site]
         faulty_gate.faulty = True
+
+        # Determine the fault value based on the fault type
         if fault[1] == 0:
             fault_value = D_Value.ONE
             faulty_gate.fault_value = D_Value.D
@@ -305,12 +315,47 @@ class PODEM:
             fault_value = D_Value.ZERO
             faulty_gate.fault_value = D_Value.D_PRIME
 
+        # Backtrace to determine the target primary input and its value
         target_primary_input, target_primary_input_value = self.backtrace(
             faulty_gate, fault_value
         )
 
+        # Imply the target primary input value
         target_primary_input.value = target_primary_input_value
         self.imply(target_primary_input)
         target_primary_input.explored = True
 
         return
+        
+
+
+def get_easiest_to_satisfy_gate( objective_value, input_list):
+    easiest_gate = None
+    easiest_value = 0
+    for gate in input_list:
+        if objective_value == D_Value.ZERO:
+            if gate.CC0 < easiest_value:
+                easiest_gate = gate
+                easiest_value = gate.CC0
+        elif objective_value == D_Value.ONE:
+            if gate.CC1 < easiest_value:
+                easiest_gate = gate
+                easiest_value = gate.CC1
+    return easiest_gate
+            
+
+def get_hardest_to_satisfy_gate(objective_value, input_list):
+    hardest_gate = None
+    hardest_value = 0
+    for gate in input_list:
+        if objective_value == D_Value.ZERO:
+            if gate.CC0 > hardest_value:
+                    hardest_gate = gate
+                    hardest_value = gate.CC0
+            elif objective_value == D_Value.ONE:
+                if gate.CC1 > hardest_value:
+                    hardest_gate = gate
+                    hardest_value = gate.CC1
+        return hardest_gate
+    
+    
