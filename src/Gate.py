@@ -37,7 +37,23 @@ class Gate:
 
         self.CCb = 0  # Combinational observability of line l.
         # The number of lines that have to be traced to observe value of line l on a primary output.
-
+        
+        
+        self.is_zero_out_controllable = False
+        self.is_one_out_controllable = False
+        
+        
+        if self.type in ["AND", "NOR", "XNOR"]:
+            self.is_one_out_controllable = False
+            self.is_zero_out_controllable = True
+        elif ["NOT", "BUF"]:
+            self.is_one_out_controllable = True
+            self.is_zero_out_controllable = True
+        else: 
+            self.is_one_out_controllable = True
+            self.is_zero_out_controllable = False            
+        
+        
         return
 
     def evaluate(self):
@@ -405,3 +421,43 @@ class Gate:
             res = 0
 
         self.CCb = res
+
+
+
+    def check_controllable_value(self, value):
+        ret = False
+        if value == D_Value.ONE:
+            ret = self.is_one_out_controllable
+        elif value == D_Value.ZERO:
+            ret = self.is_zero_out_controllable
+
+        return ret
+    
+    def get_easiest_to_satisfy_gate(self, objective_value):
+        easiest_gate = None
+        easiest_value = 0
+        for gate in self.input_gates:
+            if objective_value == D_Value.ZERO:
+                if gate.CC0 < easiest_value:
+                    easiest_gate = gate
+                    easiest_value = gate.CC0
+            elif objective_value == D_Value.ONE:
+                if gate.CC1 < easiest_value:
+                    easiest_gate = gate
+                    easiest_value = gate.CC1
+        return easiest_gate
+                
+    
+    def get_hardest_to_satisfy_gate(self, objective_value):
+        hardest_gate = None
+        hardest_value = 0
+        for gate in self.input_gates:
+            if objective_value == D_Value.ZERO:
+                if gate.CC0 > hardest_value:
+                    hardest_gate = gate
+                    hardest_value = gate.CC0
+            elif objective_value == D_Value.ONE:
+                if gate.CC1 > hardest_value:
+                    hardest_gate = gate
+                    hardest_value = gate.CC1
+        return hardest_gate
