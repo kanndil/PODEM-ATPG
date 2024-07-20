@@ -289,7 +289,35 @@ class PODEM:
 
         return False, ""
 
+
+    def generate_d_frontier(self):
+        self.D_Frontier = []
+        for gate in self.circuit.gates.values():
+            if gate.value == D_Value.X:
+                for input_gate in gate.input_gates:
+                    if input_gate.value == D_Value.D or input_gate.value == D_Value.D_PRIME:
+                        self.D_Frontier.append(gate)
+                        break
+        return
     def advanced_PODEM(self):
+        
+        # genrate the d-frontier
+        self.generate_d_frontier()
+        
+        while len(self.D_Frontier) > 0:         #loop as long as d-frontier is not empty
+            # get most observable gate, the gate with the smallest CCb
+            g = min(self.D_Frontier, key=lambda gate: gate.CCb)
+            
+            if self.check_X_path(g):    # If X-path for g exists
+                # Set objective to move fault closer to PO;
+                # Backtrace to PI;
+                # Get a new PI value to satisfy objective;
+                # Imply new PI value; 
+                pass
+            
+            # genrate the d-frontier
+            self.generate_d_frontier()
+        
         return
 
 def activate_fault(self, fault):
@@ -358,4 +386,31 @@ def get_hardest_to_satisfy_gate(objective_value, input_list):
                     hardest_value = gate.CC1
         return hardest_gate
     
+
+def get_objective(self):
+    # this function should be called in the begining of each new iteration of PODEM
+    # this should return an objective gate and value
+    # the objective gate should be chosen from the D-frontier: has input of D or D' and output of X and on an X path
+    # the objective gate should be the gate with the smallest CCb or shortest distance to PO
+    #
     
+    
+    
+    if len(self.D_Frontier) == 0:
+        return None   # ToDO: return an error
+    
+    objective_gate = None
+    objective_value = None
+    for gate in self.D_Frontier:
+        if gate.CCb < objective_gate.CCb:
+            objective_gate = gate
+    
+            
+    
+
+
+
+
+    return objective_gate
+    pass
+ 
