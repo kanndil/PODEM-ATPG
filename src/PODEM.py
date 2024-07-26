@@ -20,6 +20,8 @@ class PODEM:
         """
         # Assign the circuit object to the PODEM object
         self.circuit = circuit
+        
+        self.fault_is_activated = False
 
         # Initialize the objective function
         self.objective = None
@@ -180,6 +182,65 @@ class PODEM:
 
         # Return the target primary input gate and a boolean indicating if the objective value is D or D'
         return target_PI, target_PI_value
+    
+    
+    def backtrace_advanced(self, objective_gate, objective_value):
+        """
+        Traverse upwards from the objective gate to find the primary input gate that affects the objective gate.
+        It tracks the inversion parity along the way.
+
+        Then, it finds the primary input gate that affects the objective gate. If the inversion parity is odd, it inverts
+        the objective value.
+        Args:
+            objective_gate (Gate): The gate that the primary input gate is affecting.
+            objective_value (D_Value): The value of the objective gate.
+
+        Returns:
+            tuple: A tuple containing the primary input gate that affects the objective gate and a boolean
+                   indicating if the objective value is D or D'.
+        """
+        # Initialize variables
+        target_PI = objective_gate
+        target_PI_value = None
+        inversion_parity = target_PI.inversion_parity
+
+        # Traverse upwards from the objective gate
+        while target_PI.type != "input_pin":
+            
+            if target_PI.check_controllable_value(objective_value):
+                # take the easiest gate to satisfy 
+                target_PI = target_PI.get_easiest_to_satisfy_gate(objective_value)
+            else: 
+                # take the hardest gate to satisfy
+                # and check all values
+                
+                checklist =  target_PI.input_gates[:]
+                while len(checklist) > 0:
+                    target_PI = get_easiest_to_satisfy_gate(objective_value, checklist)
+                    checklist.remove(target_PI)
+            
+            
+            # todo: do i need this???
+            ## Find the previous gate with X value
+            #for previous_gate in target_PI.input_gates:
+            #    if previous_gate.value == D_Value.X:
+            #        target_PI = previous_gate
+            #        break
+
+            # Update the inversion parity
+            inversion_parity += target_PI.inversion_parity
+
+        # Determine the target primary input value
+        if inversion_parity % 2 == 1:
+            if objective_value == D_Value.ONE:
+                target_PI_value = D_Value.ZERO
+            elif objective_value == D_Value.ZERO:
+                target_PI_value = D_Value.ONE
+        else:
+            target_PI_value = objective_value
+
+        # Return the target primary input gate and a boolean indicating if the objective value is D or D'
+        return target_PI, target_PI_value    
     def check_error_at_primary_outputs(self):
         """
         Checks if there is an error at the primary outputs of the circuit.
@@ -386,6 +447,7 @@ def get_hardest_to_satisfy_gate(objective_value, input_list):
                     hardest_value = gate.CC1
         return hardest_gate
     
+<<<<<<< Updated upstream
 
 def get_objective(self):
     # this function should be called in the begining of each new iteration of PODEM
@@ -406,6 +468,47 @@ def get_objective(self):
             objective_gate = gate
     
             
+=======
+def opposite(self, value):
+    if value == 0:
+        return D_Value.ONE
+    elif value == 1:
+        return D_Value.ZERO
+    
+    
+
+
+def get_objective(self, fault_gate, fault_value):
+    # this function should be called in the begining of each new iteration of PODEM
+    # this should return an objective gate and value
+    # the objective gate should be chosen from the D-frontier: has input of D or D' and output of X and on an X path
+    # the objective gate should be the gate with the smallest CCb or shortest distance to PO
+    #
+    
+                
+    objective_list = []
+    
+    if self.fault_is_activated == False:
+        objective = (fault_gate , self.opposite(fault_value))
+        objective_list.append(objective)
+        return objective_list
+        
+    else:
+        
+        self.generate_d_frontier()
+        if len(self.D_Frontier) == 0:
+            return None   # ToDO: return an error
+        g = min(self.D_Frontier, key=lambda gate: gate.CCb)
+        #if self.check_X_path(g):    # If X-path for g exists  # todo: loop untill X-path is found
+        
+        objective_gate = None
+        objective_value = None
+        for input_gate in g.input_gates:
+            if input_gate.value == D_Value.X:
+                objective_gate = input_gate
+                objective_value = g.non_controlling_value
+                
+>>>>>>> Stashed changes
     
 
 
@@ -413,4 +516,27 @@ def get_objective(self):
 
     return objective_gate
     pass
+<<<<<<< Updated upstream
  
+=======
+ 
+ 
+ 
+    # # genrate the d-frontier
+    #    self.generate_d_frontier()
+        
+    #    while len(self.D_Frontier) > 0:         #loop as long as d-frontier is not empty
+    #        # get most observable gate, the gate with the smallest CCb
+    #        g = min(self.D_Frontier, key=lambda gate: gate.CCb)
+            
+    #        if self.check_X_path(g):    # If X-path for g exists
+    #            # Set objective to move fault closer to PO;
+    #            # Backtrace to PI;
+    #            # Get a new PI value to satisfy objective;
+    #            # Imply new PI value; 
+    #            pass
+            
+    #        # genrate the d-frontier
+    #        self.generate_d_frontier()
+        
+>>>>>>> Stashed changes
