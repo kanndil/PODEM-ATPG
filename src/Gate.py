@@ -21,6 +21,14 @@ class Gate:
             self.inversion_parity = 1
         else:
             self.inversion_parity = 0
+            
+            
+        if type == "BUF" or type == "NOT":
+            self.non_controlling_value = D_Value.ONE
+        elif type == "OR" or type == "NOR" or type == "XOR" or type == "XNOR":
+            self.non_controlling_value = D_Value.ZERO
+        elif type == "AND" or type == "NAND":
+            self.non_controlling_value = D_Value.ONE
 
         self.explored = False
 
