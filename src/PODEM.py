@@ -392,6 +392,7 @@ class PODEM:
         #   Another note: if the fault is not excited but the fault 
         #  location value is not X, then we have failed to activate 
         #   the fault. In this case getObjective should fail and Return false. 
+        
             
             self.generate_d_frontier()
             if len(self.D_Frontier) == 0:
@@ -405,6 +406,7 @@ class PODEM:
                 if input_gate.value == D_Value.X:
                     objective_gate = input_gate
                     objective_value = g.non_controlling_value
+             
                     break
 
         return objective_gate , objective_value
@@ -425,20 +427,6 @@ class PODEM:
 
     def backtrace_advanced(self, objective_gate, objective_value):
 
-        """
-        Traverse upwards from the objective gate to find the primary input gate that affects the objective gate.
-        It tracks the inversion parity along the way.
-
-        Then, it finds the primary input gate that affects the objective gate. If the inversion parity is odd, it inverts
-        the objective value.
-        Args:
-            objective_gate (Gate): The gate that the primary input gate is affecting.
-            objective_value (D_Value): The value of the objective gate.
-
-        Returns:
-            tuple: A tuple containing the primary input gate that affects the objective gate and a boolean
-                   indicating if the objective value is D or D'.
-        """
         # Initialize variables
         target_PI = objective_gate
         target_PI_value = objective_value
@@ -457,34 +445,36 @@ class PODEM:
                 
             target_PI, target_PI_value = self.backtrace_advanced(target_PI, target_PI_value)
 
-        # Return the target primary input gate and a boolean indicating if the objective value is D or D'
+ 
         return target_PI, target_PI_value
 
     def testImpossible(self):
-        pass
+        
+        return False
 
 
     def advanced_PODEM(self, fault, fault_value):
         
         if self.check_error_at_primary_outputs():
-            return self.ret_success_vector()
-        
-        if self.testImpossible():
-            return []
+            return True
         
         objective_gate , objective_value = self.get_objective(fault, fault_value)
+        
+        if objective_gate == None:
+            return False
         
         target_PI, target_PI_value = self.backtrace_advanced(objective_gate, objective_value)
         target_PI.value = target_PI_value
         self.imply(target_PI)
-        if self.check_error_at_primary_outputs():
-            return self.ret_success_vector()
-
-        #self.backtrack()
+        
+        
+        if self.advanced_PODEM(fault, fault_value): 
+            return True
+        
         target_PI_value.value = self.opposite(target_PI_value.value)
         self.imply(target_PI)
-        if self.check_error_at_primary_outputs():
-            return self.ret_success_vector()
+        if self.advanced_PODEM(fault, fault_value):
+            return True
 
         # release PI as unknown
         target_PI_value.value = D_Value.X
