@@ -23,11 +23,13 @@ class PODEM:
         
         self.fault_is_activated = False
 
-        # Initialize the objective function
-        self.objective = None
-
         # Initialize the list of gates with D/D' input and X output
         self.D_Frontier = []
+        
+        # fault gate and value 
+        
+        self.fault_gate = None
+        self.fault_value = None
 
     def compute(self, algorithm="basic"):
         """
@@ -380,11 +382,11 @@ class PODEM:
             return D_Value.ZERO
 
 
-    def get_objective(self, fault_gate, fault_value):
+    def get_objective(self):
                 
     
         if self.fault_is_activated == False:
-            return fault_gate , self.opposite(fault_value)
+            return self.fault_gate , self.opposite(self.fault_value)
             
         else:
             
@@ -393,10 +395,13 @@ class PODEM:
         #  location value is not X, then we have failed to activate 
         #   the fault. In this case getObjective should fail and Return false. 
         
+            if self.fault_gate.value == D_Value.ONE or self.fault_gate.value == D_Value.ZERO:
+                return None, None
+        
             
             self.generate_d_frontier()
             if len(self.D_Frontier) == 0:
-                return None   # ToDO: return an error
+                return None, None   
             g = min(self.D_Frontier, key=lambda gate: gate.CCb)
             #if self.check_X_path(g):    # If X-path for g exists  # todo: loop untill X-path is found
             
@@ -448,17 +453,13 @@ class PODEM:
  
         return target_PI, target_PI_value
 
-    def testImpossible(self):
-        
-        return False
 
-
-    def advanced_PODEM(self, fault, fault_value):
+    def advanced_PODEM(self):
         
         if self.check_error_at_primary_outputs():
             return True
         
-        objective_gate , objective_value = self.get_objective(fault, fault_value)
+        objective_gate , objective_value = self.get_objective()
         
         if objective_gate == None:
             return False
@@ -468,12 +469,12 @@ class PODEM:
         self.imply(target_PI)
         
         
-        if self.advanced_PODEM(fault, fault_value): 
+        if self.advanced_PODEM(): 
             return True
         
         target_PI_value.value = self.opposite(target_PI_value.value)
         self.imply(target_PI)
-        if self.advanced_PODEM(fault, fault_value):
+        if self.advanced_PODEM():
             return True
 
         # release PI as unknown
