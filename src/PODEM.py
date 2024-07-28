@@ -54,6 +54,13 @@ class PODEM:
                 print("test vector: ", ret)
         elif algorithm == "advanced":
             for fault in self.circuit.faults:
+                fault_site = fault[0]
+                self.fault_gate = self.circuit.gates[fault_site]
+                if fault[1] == 0:
+                    self.fault_value = D_Value.ONE
+                elif fault[1] == 1:
+                    self.fault_value = D_Value.ZERO
+                
                 self.init_PODEM()
                 ret = self.advanced_PODEM(fault)
                 print("Fault: ", fault)
@@ -302,7 +309,9 @@ class PODEM:
             if gate.value == D_Value.X:
                 for input_gate in gate.input_gates:
                     if input_gate.value == D_Value.D or input_gate.value == D_Value.D_PRIME:
-                        self.D_Frontier.append(gate)
+                        if self.check_X_path(gate):
+                            self.D_Frontier.append(gate)
+                            
                         break
         return
 
@@ -375,35 +384,30 @@ class PODEM:
     
 
 
-    def opposite(self, value):
-        if value == 0:
+    def oppositeVal(self, value):
+        if value == D_Value.ZERO:
             return D_Value.ONE
-        elif value == 1:
+        elif value == D_Value.ONE:
             return D_Value.ZERO
 
 
     def get_objective(self):
-                
     
         if self.fault_is_activated == False:
-            return self.fault_gate , self.opposite(self.fault_value)
+            return self.fault_gate , self.oppositeVal(self.fault_value)
             
-        else:
-            
-        # todo: 
-        #   Another note: if the fault is not excited but the fault 
-        #  location value is not X, then we have failed to activate 
-        #   the fault. In this case getObjective should fail and Return false. 
+        else: 
         
             if self.fault_gate.value == D_Value.ONE or self.fault_gate.value == D_Value.ZERO:
-                return None, None
-        
+                return None, None 
             
             self.generate_d_frontier()
             if len(self.D_Frontier) == 0:
-                return None, None   
+                return None, None  
+             
             g = min(self.D_Frontier, key=lambda gate: gate.CCb)
             #if self.check_X_path(g):    # If X-path for g exists  # todo: loop untill X-path is found
+            
             
             objective_gate = None
             objective_value = None
@@ -440,7 +444,7 @@ class PODEM:
         while target_PI.type != "input_pin":
             
             if target_PI.inversion_parity :
-                target_PI_value = self.opposite(target_PI_value)
+                target_PI_value = self.oppositeVal(target_PI_value)
             
             if (self.check_imply_gate(target_PI)):
                 target_PI = self.f = self.get_hardest_to_satisfy_gate()
@@ -450,7 +454,6 @@ class PODEM:
                 
             target_PI, target_PI_value = self.backtrace_advanced(target_PI, target_PI_value)
 
- 
         return target_PI, target_PI_value
 
 
@@ -468,11 +471,10 @@ class PODEM:
         target_PI.value = target_PI_value
         self.imply(target_PI)
         
-        
         if self.advanced_PODEM(): 
             return True
         
-        target_PI_value.value = self.opposite(target_PI_value.value)
+        target_PI_value.value = self.oppositeVal(target_PI_value.value)
         self.imply(target_PI)
         if self.advanced_PODEM():
             return True
