@@ -26,7 +26,7 @@ def main():
     podem_agent = PODEM(circuit=circuit)
 
     # Compute the PODEM
-    podem_agent.compute(algorithm="basic")
+    podem_agent.compute(algorithm="advanced")
 
 
 if __name__ == "__main__":

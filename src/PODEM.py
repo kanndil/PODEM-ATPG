@@ -1,5 +1,6 @@
 from Gate import Gate
 from DAlgebra import D_Value
+import math
 
 
 class PODEM:
@@ -49,26 +50,37 @@ class PODEM:
             for fault in self.circuit.faults:
                 self.init_PODEM()
                 # Use the basic POem algorithm
+                for PI in self.circuit.primary_input_gates:
+                    PI.explored = False
                 ret = self.basic_PODEM(fault)
-                print("Fault: ", fault)
-                print("test vector: ", ret)
+                if ret == True:
+                    print("Fault: ", fault)
+                    print("test vector: ", self.ret_success_vector())
+                else:
+                    print("Fault: ", fault)
+                    print("test vector: NOT FOUND ")
         elif algorithm == "advanced":
             for fault in self.circuit.faults:
                 fault_site = fault[0]
                 self.fault_gate = self.circuit.gates[fault_site]
+                self.fault_gate.faulty = True
                 if fault[1] == 0:
-                    self.fault_value = D_Value.ONE
-                elif fault[1] == 1:
                     self.fault_value = D_Value.ZERO
+                    self.fault_gate.fault_value = D_Value.ZERO
+                elif fault[1] == 1:
+                    self.fault_value = D_Value.ONE
+                    self.fault_gate.fault_value = D_Value.ONE
                 
                 self.init_PODEM()
-                ret = self.advanced_PODEM(fault)
                 print("Fault: ", fault)
-                print("test vector: ", ret)
+                ret = self.advanced_PODEM()
+                self.fault_gate.faulty = False
+                if ret == True:
+                    print("test vector: ", self.ret_success_vector())
+                else:
+                    print("test vector: NOT FOUND ")
 
-        return
 
-    def justify(self):
         return
 
     def init_PODEM(self):
@@ -77,12 +89,10 @@ class PODEM:
 
         This function iterates through all the gates in the circuit and sets their output to X.
         """
+        self.fault_is_activated = False
         for gate in self.circuit.gates.values():
             # Set the output of each gate to X
             gate.value = D_Value.X
-
-        for PI in self.circuit.primary_input_gates:
-            PI.explored = False
 
         return
 
@@ -295,7 +305,7 @@ class PODEM:
                 # SUCCESS; Exit;
                 # self.circuit.print_circuit()
                 if self.check_error_at_primary_outputs():
-                    return True, self.ret_success_vector()
+                    return True
                 else:
                     if self.check_D_in_circuit():
                         break
@@ -353,34 +363,72 @@ class PODEM:
             
 
 
-    def get_easiest_to_satisfy_gate( self, objective_value, input_list):
+    def get_easiest_to_satisfy_gate(self, objective_gate, objective_value):
+        """
+        Find the input gate with the smallest CC0 or CC1 value, depending on the objective value.
+
+        Args:
+            objective_gate (Gate): The gate for which we want to find the easiest gate to satisfy.
+            objective_value (D_Value): The value we want to satisfy.
+
+        Returns:
+            Gate: The input gate with the smallest CC0 or CC1 value.
+        """
         easiest_gate = None
-        easiest_value = 0
-        for gate in input_list:
-            if objective_value == D_Value.ZERO:
-                if gate.CC0 < easiest_value:
-                    easiest_gate = gate
-                    easiest_value = gate.CC0
-            elif objective_value == D_Value.ONE:
-                if gate.CC1 < easiest_value:
-                    easiest_gate = gate
-                    easiest_value = gate.CC1
+        easiest_value = math.inf  # Initialize with an impossible value
+
+        # Iterate over all input gates
+        for gate in objective_gate.input_gates:
+            # Check if the gate is not set and the value is X
+            if gate.value == D_Value.X:
+                # If the objective value is ZERO, check if the CC0 value is smaller than the current best
+                if objective_value == D_Value.ZERO:
+                    if gate.CC0 < easiest_value:
+                        easiest_gate = gate
+                        easiest_value = gate.CC0
+
+                # If the objective value is ONE, check if the CC1 value is smaller than the current best
+                elif objective_value == D_Value.ONE:
+                    if gate.CC1 < easiest_value:
+                        easiest_gate = gate
+                        easiest_value = gate.CC1
+
+        # Return the easiest gate
         return easiest_gate
                 
 
-    def get_hardest_to_satisfy_gate( self, objective_value, input_list):
-        hardest_gate = None
-        hardest_value = 0
-        for gate in input_list:
-            if objective_value == D_Value.ZERO:
-                if gate.CC0 > hardest_value:
+    def get_hardest_to_satisfy_gate(self, objective_gate, objective_value):
+        """
+        Find the input gate with the largest CC0 or CC1 value, depending on the objective value.
+
+        Args:
+            objective_gate (Gate): The gate for which we want to find the hardest gate to satisfy.
+            objective_value (D_Value): The value we want to satisfy.
+
+        Returns:
+            Gate: The input gate with the largest CC0 or CC1 value.
+        """
+        hardest_gate = None  # The gate with the largest CC0 or CC1 value
+        hardest_value = -math.inf  # The largest CC0 or CC1 value
+
+        # Iterate over all input gates
+        for gate in objective_gate.input_gates:
+            # Check if the gate is not set and the value is X
+            if gate.value == D_Value.X:
+                # If the objective value is ZERO, check if the CC0 value is larger than the current hardest
+                if objective_value == D_Value.ZERO:
+                    if gate.CC0 > hardest_value:
                         hardest_gate = gate
                         hardest_value = gate.CC0
+
+                # If the objective value is ONE, check if the CC1 value is larger than the current hardest
                 elif objective_value == D_Value.ONE:
                     if gate.CC1 > hardest_value:
                         hardest_gate = gate
                         hardest_value = gate.CC1
-            return hardest_gate
+
+        # Return the hardest gate
+        return hardest_gate
     
 
 
@@ -393,21 +441,22 @@ class PODEM:
 
     def get_objective(self):
     
+        if self.fault_gate.value == D_Value.D or self.fault_gate.value == D_Value.D_PRIME:
+            self.fault_is_activated = True
+            
         if self.fault_is_activated == False:
+            if self.fault_gate.value == D_Value.ONE or self.fault_gate.value == D_Value.ZERO:
+                return None, None 
+
             return self.fault_gate , self.oppositeVal(self.fault_value)
             
         else: 
         
-            if self.fault_gate.value == D_Value.ONE or self.fault_gate.value == D_Value.ZERO:
-                return None, None 
-            
             self.generate_d_frontier()
             if len(self.D_Frontier) == 0:
                 return None, None  
              
             g = min(self.D_Frontier, key=lambda gate: gate.CCb)
-            #if self.check_X_path(g):    # If X-path for g exists  # todo: loop untill X-path is found
-            
             
             objective_gate = None
             objective_value = None
@@ -435,25 +484,37 @@ class PODEM:
     
 
     def backtrace_advanced(self, objective_gate, objective_value):
+        """
+        Traverse backward from the objective gate to find the primary input that affects the objective gate.
+        It tracks the inversion parity along the way to determine the primary input value.
 
+        Args:
+            objective_gate (Gate): The gate that the primary input gate is affecting.
+            objective_value (D_Value): The value to be set to the objective gate.
+
+        Returns:
+            tuple: A tuple containing the primary input gate that affects the objective gate and its value.
+        """
         # Initialize variables
-        target_PI = objective_gate
-        target_PI_value = objective_value
+        target_PI = objective_gate  
+        target_PI_value = objective_value  
 
-        # Traverse upwards from the objective gate
+        # Traverse backward from the objective gate
         while target_PI.type != "input_pin":
             
+            # If the target_PI has an inversion parity, flip the target_PI_value
             if target_PI.inversion_parity :
                 target_PI_value = self.oppositeVal(target_PI_value)
             
-            if (self.check_imply_gate(target_PI)):
-                target_PI = self.f = self.get_hardest_to_satisfy_gate()
+            if (self.check_imply_gate(target_PI, target_PI_value)):
+                target_PI = self.get_hardest_to_satisfy_gate(objective_gate, objective_value)
             else:
-                target_PI = self.get_easiest_to_satisfy_gate()
+                target_PI = self.get_easiest_to_satisfy_gate(objective_gate, objective_value)
                 
-                
+            # Recursively call the function to traverse backward
             target_PI, target_PI_value = self.backtrace_advanced(target_PI, target_PI_value)
 
+        # Return the target primary input gate and value
         return target_PI, target_PI_value
 
 
@@ -474,13 +535,13 @@ class PODEM:
         if self.advanced_PODEM(): 
             return True
         
-        target_PI_value.value = self.oppositeVal(target_PI_value.value)
+        target_PI_value = self.oppositeVal(target_PI_value)
         self.imply(target_PI)
         if self.advanced_PODEM():
             return True
 
         # release PI as unknown
-        target_PI_value.value = D_Value.X
+        target_PI_value = D_Value.X
         self.imply(target_PI)
         
         return False
