@@ -648,7 +648,6 @@ class PODEM:
         for gate_type, count in gate_types.items():
             report_str += f"                                  {gate_type}: {count}\n"
         
-        report_str += "    =================================================================="
 
         return report_str
 

@@ -43,7 +43,7 @@ def main():
     combined_report = f"""
     ================== PODEM Fault Coverage Report ==================
 
-    {report.strip()}
+        {report.strip()}
 
     ------------------------------------------------------------------
     Total Time Taken: {total_time:.4f} seconds
