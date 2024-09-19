@@ -6,7 +6,7 @@ class Circuit:
 
     index_id = 0
 
-    def __init__(self):
+    def __init__(self, filename):
         """
         Initializes a Circuit object with default attributes.
 
@@ -32,6 +32,10 @@ class Circuit:
 
         # List of all faults in the circuit
         self.faults = []
+        
+        self.parse_circuit_file(filename)
+        #circuit.parse_fault_file(fault_file)
+        self.generate_fault_vector()
 
         return
 
@@ -253,3 +257,26 @@ class Circuit:
     def reset_explored(self):
         for gate in self.gates.values():
             gate.explored = False
+
+        return
+    
+    def generate_fault_vector(self):
+        """
+        Generates a list of all possible faults in the circuit.
+
+        A fault is a tuple containing the name of a gate's output pin and a value of either 0 or 1. For example, if the circuit has a gate with output pin 'a', the fault vector would include the tuples ('a', 0) and ('a', 1).
+
+        The list of faults is stored in the 'faults' attribute of the Circuit object.
+
+        Returns:
+            None
+        """
+        # Iterate over all gates in the circuit
+        for gate in self.gates.values():
+            # For each gate, add two tuples to the fault vector: one with the gate's output pin and a value of 0, and one with the gate's output pin and a value of 1
+            self.faults.append((gate.outputpin, 0))
+            self.faults.append((gate.outputpin, 1))
+        return
+            
+        
+        

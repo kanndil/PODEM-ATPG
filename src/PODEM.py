@@ -314,15 +314,34 @@ class PODEM:
 
 
     def generate_d_frontier(self):
+        """
+        Generate the D frontier of the circuit.
+
+        The D frontier is a list of gates that are relevant to the fault detection process.
+        These gates have input gates with a value of D or D' and have an X path from
+        one of their output gates.
+
+        Returns:
+            None
+        """
+        # Initialize the D frontier list
         self.D_Frontier = []
+
+        # Iterate through all the gates in the circuit
         for gate in self.circuit.gates.values():
+            # Check if the gate has an X value
             if gate.value == D_Value.X:
+                # Iterate through the input gates of the gate
                 for input_gate in gate.input_gates:
+                    # Check if the input gate has a value of D or D'
                     if input_gate.value == D_Value.D or input_gate.value == D_Value.D_PRIME:
+                        # If there is an X path from one of the gate's output gates, add the gate to the D frontier
                         if self.check_X_path(gate):
                             self.D_Frontier.append(gate)
                             
+                        # Break out of the loop after the first relevant input gate is found
                         break
+        # Return the D frontier
         return
 
 
@@ -440,26 +459,41 @@ class PODEM:
 
 
     def get_objective(self):
-    
+        """
+        This method determines the objective gate and its value based on the current state of the circuit.
+
+        Returns:
+            tuple: A tuple containing the objective gate and its value. If the fault is not activated or if the fault gate value is ONE or ZERO, then None is returned.
+        """
+
+        # Check if the fault is activated
         if self.fault_gate.value == D_Value.D or self.fault_gate.value == D_Value.D_PRIME:
             self.fault_is_activated = True
             
-        if self.fault_is_activated == False:
+        # If the fault is not activated, check if the fault gate value is ONE or ZERO 
+        # (this indicates a fault that cannot be activated)
+        if not self.fault_is_activated:
             if self.fault_gate.value == D_Value.ONE or self.fault_gate.value == D_Value.ZERO:
                 return None, None 
 
+            # Return the fault gate and its opposite value
             return self.fault_gate , self.oppositeVal(self.fault_value)
             
         else: 
         
+            # Generate the D frontier
             self.generate_d_frontier()
+            # If the D frontier is empty, return None
+            # (there is no way to uncover the fault)
             if len(self.D_Frontier) == 0:
                 return None, None  
              
+            # Find the gate in the D frontier with the smallest CCb value
             g = min(self.D_Frontier, key=lambda gate: gate.CCb)
             
             objective_gate = None
             objective_value = None
+            # Find the first input gate with X value
             for input_gate in g.input_gates:
                 if input_gate.value == D_Value.X:
                     objective_gate = input_gate
@@ -467,9 +501,12 @@ class PODEM:
              
                     break
 
+        # Return the objective gate and its value
         return objective_gate , objective_value
 
+
     def check_imply_gate(self, gate, value):
+
         if value == D_Value.ONE:
             if gate.type == "OR" or gate.type == "NAND":
                 return False
@@ -481,6 +518,7 @@ class PODEM:
                 return False
             else:
                 return True
+
     
 
     def backtrace_advanced(self, objective_gate, objective_value):
@@ -519,29 +557,50 @@ class PODEM:
 
 
     def advanced_PODEM(self):
-        
+        """
+        Recursively attempts to find a test vector that satisfies all the primary outputs of the circuit.
+
+        Returns:
+            bool: True if a test vector is found, False other
+            wise.
+        """
+        # Check if there is an error at the primary outputs
         if self.check_error_at_primary_outputs():
             return True
-        
-        objective_gate , objective_value = self.get_objective()
-        
-        if objective_gate == None:
+
+        # Get the objective gate and its value
+        objective_gate, objective_value = self.get_objective()
+
+        # If no objective gate is found, return False
+        # It is not possible to find a test vector that uncovers the fault
+        if objective_gate is None:
             return False
-        
+
+        # Backtrace to find the primary input that affects the objective gate
         target_PI, target_PI_value = self.backtrace_advanced(objective_gate, objective_value)
+
+        # Set the value of the target primary input
         target_PI.value = target_PI_value
+
+        # Imply the value to the target primary input
         self.imply(target_PI)
-        
-        if self.advanced_PODEM(): 
-            return True
-        
-        target_PI_value = self.oppositeVal(target_PI_value)
-        self.imply(target_PI)
+
+        # Recursively call advanced_PODEM
         if self.advanced_PODEM():
             return True
 
-        # release PI as unknown
+        # Backtracking
+        # If the first attempt fails, try the other possible value for the target primary input
+        target_PI_value = self.oppositeVal(target_PI_value)
+        self.imply(target_PI)
+
+        if self.advanced_PODEM():
+            return True
+
+        # Backtracking
+        # If both attempts fail, release the target primary input as unknown
         target_PI_value = D_Value.X
         self.imply(target_PI)
-        
+
         return False
+    
