@@ -10,7 +10,7 @@ class PODEM:
 
     """
 
-    def __init__(self, circuit):
+    def __init__(self, circuit, output_file):
         """
         Initializes a PODEM object.
 
@@ -22,7 +22,7 @@ class PODEM:
         """
         # Assign the circuit object to the PODEM object
         self.circuit = circuit
-        
+        self.output_file = output_file
         self.fault_is_activated = False
 
         # Initialize the list of gates with D/D' input and X output
@@ -66,6 +66,7 @@ class PODEM:
                 #    print("Fault: ", fault)
                 #    print("test vector: NOT FOUND ")
         elif algorithm == "advanced":
+            test_vectors = []  # Initialize an empty list to store the test vectors
             for fault in self.circuit.faults:
                 fault_site = fault[0]
                 self.fault_gate = self.circuit.gates[fault_site]
@@ -78,15 +79,27 @@ class PODEM:
                     self.fault_gate.fault_value = D_Value.ONE
                 
                 self.init_PODEM()
-                #print("Fault: ", fault)
+                print("Fault: ", fault)
                 ret = self.advanced_PODEM()
                 self.fault_gate.faulty = False
                 if ret == True:
-                    #print("test vector: ", self.ret_success_vector())
+                    success_vector = self.ret_success_vector()  # Get the test vector
+                    print("test vector: ", success_vector)
+                    success_vector = ''.join(['1' if char == 'X' else char for char in success_vector])
+                    test_vectors.append(f"{success_vector}\n")
                     self.uncovered_faults += 1
                 else:
-                    #print("test vector: NOT FOUND ")
+                    print("test vector: NOT FOUND ")
                     self.failures += 1
+        ## Write the entire list to the file at once
+        header_pin_names= ""
+        for PI in self.circuit.primary_input_gates:
+            header_pin_names+= f"{PI.outputpin} "
+            
+            
+        with open(self.output_file, "w") as f:
+            f.write(header_pin_names + "\n")
+            f.writelines(test_vectors)
 
         return
 

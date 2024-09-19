@@ -23,7 +23,7 @@ class Gate:
             self.inversion_parity = 0
             
             
-        if type == "BUF" or type == "NOT":
+        if type == "BUFF" or type == "NOT":
             self.non_controlling_value = D_Value.ONE
         elif type == "OR" or type == "NOR" or type == "XOR" or type == "XNOR":
             self.non_controlling_value = D_Value.ZERO
@@ -54,7 +54,7 @@ class Gate:
         if self.type in ["AND", "NOR", "XNOR"]:
             self.is_one_out_controllable = False
             self.is_zero_out_controllable = True
-        elif ["NOT", "BUF"]:
+        elif ["NOT", "BUFF"]:
             self.is_one_out_controllable = True
             self.is_zero_out_controllable = True
         else: 
@@ -86,6 +86,8 @@ class Gate:
             self.value = self.evaluate_or()
         elif self.type == "XOR":
             self.value = self.evaluate_xor()
+        elif self.type == "BUFF":
+            self.value = self.evaluate_buff()
         elif self.type == "NOT":
             self.value = self.evaluate_not()
         elif self.type == "NAND":
@@ -275,6 +277,25 @@ class Gate:
             return D_Value.ONE
         else:
             return D_Value.X
+        
+    def evaluate_buff(self):
+        """
+        Evaluates the value of a BUFF gate based on its input.
+
+        This function checks the input of a BUFF gate and determines the value based on the following rules:
+        - If the input is D, the value is D.
+        - If the input is D_PRIME, the value is D_PRIME.
+        - If the input is X, the value is X.
+
+        Returns:
+            D_Value: The value value of the BUFF gate.
+        """
+        temp_input_gates = []
+        for g in self.input_gates:
+            temp_input_gates.append(g.value)
+        # Check the input value
+        return temp_input_gates[0]
+        
 
     def evaluate_nand(self):
         """
@@ -362,6 +383,8 @@ class Gate:
             )
         elif self.type == "NOT":
             res = self.input_gates[0].CC1 + 1
+        elif self.type == "BUFF":
+            res = self.input_gates[0].CC0 + 1
         elif self.type == "input_pin":
             res = 1
         elif self.type == "output_pin":
@@ -397,6 +420,8 @@ class Gate:
             )
         elif self.type == "NOT":
             res = self.input_gates[0].CC0 + 1
+        elif self.type == "BUFF":
+            res = self.input_gates[0].CC1 + 1
         elif self.type == "input_pin":
             res = 1
         elif self.type == "output_pin":
@@ -423,6 +448,8 @@ class Gate:
             pass
         elif self.type == "NOT":
             res = CCb_output + 1
+        elif self.type == "BUFF":
+            res = CCb_output+1
         elif self.type == "input_pin":
             res = CCb_output
         elif self.type == "output_pin":

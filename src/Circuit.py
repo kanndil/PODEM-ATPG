@@ -54,9 +54,10 @@ class Circuit:
             lines = file.readlines()
 
             # Define regular expression patterns
-            input_pattern = re.compile(r"INPUT\((\w+)\)")  # Matches input gates
-            output_pattern = re.compile(r"OUTPUT\((\w+)\)")  # Matches output gates
-            gate_pattern = re.compile(r"(\w+) = (\w+)\(([\w, ]+)\)")  # Matches gates
+            input_pattern = re.compile(r"INPUT\(([\w_.]+)\)")
+            output_pattern = re.compile(r"OUTPUT\(([\w_.]+)\)")
+            gate_pattern = re.compile(r"([\w_.]+) = (\w+)\(([\w_. ,]+)\)")
+
 
             # Iterate over each line in the file
             for line in lines:
@@ -167,7 +168,7 @@ class Circuit:
             current_gate.input_gates.clear()
             # Iterate over each input pin
             for input_id in input_ids:
-                # Retrieve the corresponding previoud gate from the circuit's dictionary of gates
+                # Retrieve the corresponding previous gate from the circuit's dictionary of gates
                 previous_gate = self.gates[input_id]
                 # Connect the current gate to the previous gate as an input gate
                 current_gate.input_gates.append(previous_gate)
