@@ -1,4 +1,5 @@
 import argparse
+import time
 from PODEM import PODEM
 from Circuit import Circuit
 
@@ -23,9 +24,35 @@ def main():
     # Create PODEM agent and parse the input file
     podem_agent = PODEM(circuit=circuit)
 
+    # Start timing the PODEM computation
+    start_time = time.time()
+
     # Compute the PODEM
     podem_agent.compute(algorithm="advanced")
+    
+    # End timing
+    end_time = time.time()
 
+    # Total time taken
+    total_time = end_time - start_time
+
+    # Generate the PODEM report
+    report = podem_agent.report()
+
+    # Combine time taken with the report
+    combined_report = f"""
+    ================== PODEM Fault Coverage Report ==================
+
+    {report.strip()}
+
+    ------------------------------------------------------------------
+    Total Time Taken: {total_time:.4f} seconds
+
+    ==================================================================
+    """
+
+    # Print the combined report
+    print(combined_report)
 
 if __name__ == "__main__":
     main()

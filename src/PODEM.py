@@ -1,7 +1,8 @@
 from Gate import Gate
 from DAlgebra import D_Value
 import math
-
+import time
+from collections import Counter
 
 class PODEM:
     """
@@ -31,6 +32,11 @@ class PODEM:
         
         self.fault_gate = None
         self.fault_value = None
+        
+        self.no_of_faults = self.circuit.faults.__len__()
+        self.uncovered_faults = 0
+        self.failures = 0
+        self.fault_coverage = 0
 
     def compute(self, algorithm="basic"):
         """
@@ -53,12 +59,12 @@ class PODEM:
                 for PI in self.circuit.primary_input_gates:
                     PI.explored = False
                 ret = self.basic_PODEM(fault)
-                if ret == True:
-                    print("Fault: ", fault)
-                    print("test vector: ", self.ret_success_vector())
-                else:
-                    print("Fault: ", fault)
-                    print("test vector: NOT FOUND ")
+                #if ret == True:
+                #    print("Fault: ", fault)
+                #    print("test vector: ", self.ret_success_vector())
+                #else:
+                #    print("Fault: ", fault)
+                #    print("test vector: NOT FOUND ")
         elif algorithm == "advanced":
             for fault in self.circuit.faults:
                 fault_site = fault[0]
@@ -72,14 +78,15 @@ class PODEM:
                     self.fault_gate.fault_value = D_Value.ONE
                 
                 self.init_PODEM()
-                print("Fault: ", fault)
+                #print("Fault: ", fault)
                 ret = self.advanced_PODEM()
                 self.fault_gate.faulty = False
                 if ret == True:
-                    print("test vector: ", self.ret_success_vector())
+                    #print("test vector: ", self.ret_success_vector())
+                    self.uncovered_faults += 1
                 else:
-                    print("test vector: NOT FOUND ")
-
+                    #print("test vector: NOT FOUND ")
+                    self.failures += 1
 
         return
 
@@ -603,4 +610,45 @@ class PODEM:
         self.imply(target_PI)
 
         return False
-    
+
+    def report(self):
+        """
+        Generates a comprehensive report on the fault coverage, uncovered faults, and failures after running the PODEM algorithm.
+
+        This method summarizes the results of the PODEM algorithm and calculates the fault coverage percentage.
+
+        Returns:
+            str: A well-structured report as a string.
+        """
+        # Calculate fault coverage percentage
+        total_faults = self.no_of_faults
+        if total_faults == 0:
+            self.fault_coverage = 0
+        else:
+            self.fault_coverage = (self.uncovered_faults / total_faults) * 100 
+
+        # Gather statistics for the report
+        total_cells = len(self.circuit.gates)
+        gate_types = Counter([gate.type for gate in self.circuit.gates.values()])
+
+        # Generate the report string
+        report_str = f"""
+
+        Total Faults Tested     : {total_faults}
+        Uncovered Faults        : {self.uncovered_faults}
+        Failures                : {self.failures}
+        Fault Coverage          : {self.fault_coverage:.2f}%
+                                  
+        ================== Circuit Details ==================
+        Total Cells             : {total_cells}
+        Gate Type Breakdown     :
+"""
+        
+        # Add gate types breakdown to the report string
+        for gate_type, count in gate_types.items():
+            report_str += f"                                  {gate_type}: {count}\n"
+        
+        report_str += "    =================================================================="
+
+        return report_str
+
