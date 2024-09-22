@@ -29,7 +29,7 @@ def main():
     
     
     #input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/s27.bench"
-    #output_file = "output_file.txt"
+    #output_file = "output_file.test"
     #report_file = ""
 
     # Create Circuit object from the input file
@@ -66,7 +66,7 @@ def main():
     """
 
     # Optionally print the report to the console
-    print(combined_report)
+    #print(combined_report)
 
     # If a report file is specified, write the detailed report to it
     if report_file:
