@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install required packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel
+
+      - name: Build PodemQuest
+        run: |
+          make
+
+      - name: Run Tests
+        run: |
+          echo "Running test cases..."
+          for file in test/*.bench; do
+            echo "Running podemquest with $file"
+            podemquest -i "$file" -o "output_${file##*/}.txt"
+          done
