@@ -30,10 +30,11 @@ jobs:
 
       - name: Run Tests
         run: |
-            echo "Running test cases..."
-            for file in test/*.bench; do
+          echo "Running test cases..."
+          for file in test/*.bench; do
             echo "Running podemquest with $file"
             podemquest -i "$file" -o "output_${file##*/}.txt"
-            done
-            echo "Output files:"
-            ls -l output_*.txt  # List the generated output files
+            echo "Contents of output_${file##*/}.txt:"
+            cat "output_${file##*/}.txt"  # Output the contents of the generated file
+            echo "-----------------------------"
+          done
