@@ -12,13 +12,25 @@ def main():
 
     # Add input, output, and report file arguments
     parser.add_argument(
-        "-i", "--input_file", type=str, required=True, help="The input file to be processed by PODEM"
+        "-i",
+        "--input_file",
+        type=str,
+        required=True,
+        help="The input file to be processed by PODEM",
     )
     parser.add_argument(
-        "-o", "--output_file", type=str, required=True, help="The output file to save the PODEM report"
+        "-o",
+        "--output_file",
+        type=str,
+        required=True,
+        help="The output file to save the PODEM report",
     )
     parser.add_argument(
-        "-r", "--report_file", type=str, help="The file to save the detailed PODEM report", default=None
+        "-r",
+        "--report_file",
+        type=str,
+        help="The file to save the detailed PODEM report",
+        default=None,
     )
 
     ## Parse arguments
@@ -26,11 +38,10 @@ def main():
     input_file = args.input_file
     output_file = args.output_file
     report_file = args.report_file
-    
-    
-    #input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/s27.bench"
-    #output_file = "output_file.test"
-    #report_file = ""
+
+    # input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/s27.bench"
+    # output_file = "output_file.test"
+    # report_file = ""
 
     # Create Circuit object from the input file
     circuit = Circuit(input_file)
@@ -43,7 +54,7 @@ def main():
 
     # Compute the PODEM algorithm
     podem_agent.compute(algorithm="advanced")
-    
+
     # End timing
     end_time = time.time()
 
@@ -66,11 +77,11 @@ def main():
     """
 
     # Optionally print the report to the console
-    #print(combined_report)
+    # print(combined_report)
 
     # If a report file is specified, write the detailed report to it
     if report_file:
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             f.write(combined_report)
 
 

@@ -21,8 +21,7 @@ class Gate:
             self.inversion_parity = 1
         else:
             self.inversion_parity = 0
-            
-            
+
         if type == "BUFF" or type == "NOT":
             self.non_controlling_value = D_Value.ONE
         elif type == "OR" or type == "NOR" or type == "XOR" or type == "XNOR":
@@ -45,23 +44,20 @@ class Gate:
 
         self.CCb = 0  # Combinational observability of line l.
         # The number of lines that have to be traced to observe value of line l on a primary output.
-        
-        
+
         self.is_zero_out_controllable = False
         self.is_one_out_controllable = False
-        
-        
+
         if self.type in ["AND", "NOR", "XNOR"]:
             self.is_one_out_controllable = False
             self.is_zero_out_controllable = True
         elif ["NOT", "BUFF"]:
             self.is_one_out_controllable = True
             self.is_zero_out_controllable = True
-        else: 
+        else:
             self.is_one_out_controllable = True
-            self.is_zero_out_controllable = False            
-        
-        
+            self.is_zero_out_controllable = False
+
         return
 
     def evaluate(self):
@@ -277,7 +273,7 @@ class Gate:
             return D_Value.ONE
         else:
             return D_Value.X
-        
+
     def evaluate_buff(self):
         """
         Evaluates the value of a BUFF gate based on its input.
@@ -295,7 +291,6 @@ class Gate:
             temp_input_gates.append(g.value)
         # Check the input value
         return temp_input_gates[0]
-        
 
     def evaluate_nand(self):
         """
@@ -449,15 +444,13 @@ class Gate:
         elif self.type == "NOT":
             res = CCb_output + 1
         elif self.type == "BUFF":
-            res = CCb_output+1
+            res = CCb_output + 1
         elif self.type == "input_pin":
             res = CCb_output
         elif self.type == "output_pin":
             res = 0
 
         self.CCb = res
-
-
 
     def check_controllable_value(self, value):
         ret = False
@@ -467,7 +460,7 @@ class Gate:
             ret = self.is_zero_out_controllable
 
         return ret
-    
+
     def get_easiest_to_satisfy_gate(self, objective_value):
         easiest_gate = None
         easiest_value = 0
@@ -481,8 +474,7 @@ class Gate:
                     easiest_gate = gate
                     easiest_value = gate.CC1
         return easiest_gate
-                
-    
+
     def get_hardest_to_satisfy_gate(self, objective_value):
         hardest_gate = None
         hardest_value = 0

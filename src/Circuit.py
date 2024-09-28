@@ -32,9 +32,9 @@ class Circuit:
 
         # List of all faults in the circuit
         self.faults = []
-        
+
         self.parse_circuit_file(filename)
-        #circuit.parse_fault_file(fault_file)
+        # circuit.parse_fault_file(fault_file)
         self.generate_fault_vector()
 
         return
@@ -57,7 +57,6 @@ class Circuit:
             input_pattern = re.compile(r"INPUT\(([\w_.]+)\)")
             output_pattern = re.compile(r"OUTPUT\(([\w_.]+)\)")
             gate_pattern = re.compile(r"([\w_.]+) = (\w+)\(([\w_. ,]+)\)")
-
 
             # Iterate over each line in the file
             for line in lines:
@@ -260,7 +259,7 @@ class Circuit:
             gate.explored = False
 
         return
-    
+
     def generate_fault_vector(self):
         """
         Generates a list of all possible faults in the circuit.
@@ -278,6 +277,3 @@ class Circuit:
             self.faults.append((gate.outputpin, 0))
             self.faults.append((gate.outputpin, 1))
         return
-            
-        
-        
