@@ -27,19 +27,19 @@ all: install
 # Build the package
 build:
 	@echo "Building $(PACKAGE_NAME)..."
-	python setup.py sdist bdist_wheel
+	sudo python setup.py sdist bdist_wheel
 
 # Install the package
 install: build
 	@echo "Installing $(PACKAGE_NAME)..."
-	pip install .
+	sudo pip install .
 
 # Uninstall the package
 uninstall:
 	@echo "Uninstalling $(PACKAGE_NAME)..."
-	pip uninstall -y $(PACKAGE_NAME)
+	sudo pip uninstall -y $(PACKAGE_NAME)
 
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -rf build dist src/$(PACKAGE_NAME).egg-info
+	sudo rm -rf build dist src/$(PACKAGE_NAME).egg-info

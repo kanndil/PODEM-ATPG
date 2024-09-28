@@ -57,10 +57,6 @@ def main():
     output_file = args.output_file
     report_file = args.report_file
 
-    # input_file = "/Users/youssef/Documents/Work/GSOC/PODEM-ATPG/test/s27.bench"
-    # output_file = "output_file.test"
-    # report_file = ""
-
     # Create Circuit object from the input file
     circuit = Circuit(input_file)
 
