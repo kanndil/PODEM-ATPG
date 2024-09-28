@@ -1,7 +1,5 @@
-from Gate import Gate
-from DAlgebra import D_Value
+from .DAlgebra import D_Value
 import math
-import time
 from collections import Counter
 
 

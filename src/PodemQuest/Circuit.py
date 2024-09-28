@@ -1,4 +1,4 @@
-from Gate import Gate
+from .Gate import Gate
 import re
 
 

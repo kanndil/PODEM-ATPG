@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class D_Value(Enum):
     """
     The D_Value class represents the D value of a gate {0,1,D,D',x}.

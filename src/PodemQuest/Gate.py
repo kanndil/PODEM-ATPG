@@ -1,4 +1,4 @@
-from DAlgebra import D_Value
+from .DAlgebra import D_Value
 
 
 class Gate:
