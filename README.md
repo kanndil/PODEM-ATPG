@@ -108,7 +108,7 @@ This project is licensed under the Apache License 2.0. You may obtain a copy of 
 
 ### Copyright
 
-Copyright (c) 2024, Youssef Kandil (youssefkandil@aucegypt.edu)
+Copyright (c) 2024, Youssef Kandil (youssefkandil@aucegypt.edu) - Mohamed Shalan (mshalan@aucegypt.edu)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at the link above.
 
