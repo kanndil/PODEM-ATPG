@@ -41,7 +41,7 @@ class Gate:
         else:
             self.inversion_parity = 0
 
-        if type == "BUFF" or type == "NOT":
+        if type == "BUFF" or type == "BUF" or type == "NOT":
             self.non_controlling_value = D_Value.ONE
         elif type == "OR" or type == "NOR" or type == "XOR" or type == "XNOR":
             self.non_controlling_value = D_Value.ZERO
@@ -70,7 +70,7 @@ class Gate:
         if self.type in ["AND", "NOR", "XNOR"]:
             self.is_one_out_controllable = False
             self.is_zero_out_controllable = True
-        elif ["NOT", "BUFF"]:
+        elif ["NOT", "BUFF", "BUF"]:
             self.is_one_out_controllable = True
             self.is_zero_out_controllable = True
         else:
@@ -101,7 +101,7 @@ class Gate:
             self.value = self.evaluate_or()
         elif self.type == "XOR":
             self.value = self.evaluate_xor()
-        elif self.type == "BUFF":
+        elif self.type == "BUFF" or self.type == "BUF":
             self.value = self.evaluate_buff()
         elif self.type == "NOT":
             self.value = self.evaluate_not()
@@ -397,7 +397,7 @@ class Gate:
             )
         elif self.type == "NOT":
             res = self.input_gates[0].CC1 + 1
-        elif self.type == "BUFF":
+        elif self.type == "BUFF" or self.type == "BUF":
             res = self.input_gates[0].CC0 + 1
         elif self.type == "input_pin":
             res = 1
@@ -434,7 +434,7 @@ class Gate:
             )
         elif self.type == "NOT":
             res = self.input_gates[0].CC0 + 1
-        elif self.type == "BUFF":
+        elif self.type == "BUFF" or self.type == "BUF":
             res = self.input_gates[0].CC1 + 1
         elif self.type == "input_pin":
             res = 1
@@ -462,7 +462,7 @@ class Gate:
             pass
         elif self.type == "NOT":
             res = CCb_output + 1
-        elif self.type == "BUFF":
+        elif self.type == "BUFF" or self.type == "BUF":
             res = CCb_output + 1
         elif self.type == "input_pin":
             res = CCb_output
