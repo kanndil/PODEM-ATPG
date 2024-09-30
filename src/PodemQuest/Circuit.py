@@ -73,9 +73,9 @@ class Circuit:
             lines = file.readlines()
 
             # Define regular expression patterns
-            input_pattern = re.compile(r"INPUT\(([\w_.]+)\)")
-            output_pattern = re.compile(r"OUTPUT\(([\w_.]+)\)")
-            gate_pattern = re.compile(r"([\w_.]+) = (\w+)\(([\w_. ,]+)\)")
+            input_pattern = re.compile(r"INPUT\(([\w_.\[\]0-9]+)\)")
+            output_pattern = re.compile(r"OUTPUT\(([\w_.\[\]0-9]+)\)")
+            gate_pattern = re.compile(r"([\w_.\[\]0-9]+) = (\w+)\(([\w_.\[\]0-9 ,]+)\)")
 
             # Iterate over each line in the file
             for line in lines:
